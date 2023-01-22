@@ -5,7 +5,7 @@
 ################################################################################
 ARG                 base="rust:buster"
 ARG                 runtime="debian:buster-slim"
-ARG                 bin="rust-http-starter"
+ARG                 bin="gilgamesh"
 ARG                 version="unknown"
 ARG                 sha="unknown"
 ARG                 maintainer="WalletConnect"
@@ -49,7 +49,7 @@ COPY --from=plan    /app/recipe.json recipe.json
 RUN                 cargo chef cook --recipe-path recipe.json ${RELEASE}
 # Build the local binary
 COPY                . .
-RUN                 cargo build --bin rust-http-starter ${RELEASE}
+RUN                 cargo build --bin gilgamesh ${RELEASE}
 
 ################################################################################
 #
@@ -70,11 +70,11 @@ LABEL               sha=${sha}
 LABEL               maintainer=${maintainer}
 
 WORKDIR             /app
-COPY --from=build   /app/target/${binpath:-debug}/rust-http-starter /usr/local/bin/rust-http-starter
+COPY --from=build   /app/target/${binpath:-debug}/gilgamesh /usr/local/bin/gilgamesh
 RUN                 apt-get update \
                         && apt-get install -y --no-install-recommends ca-certificates libssl-dev \
                         && apt-get clean \
                         && rm -rf /var/lib/apt/lists/*
 
 USER                1001:1001
-ENTRYPOINT          ["/usr/local/bin/rust-http-starter"]
+ENTRYPOINT          ["/usr/local/bin/gilgamesh"]

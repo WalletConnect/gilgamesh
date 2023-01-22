@@ -10,7 +10,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=root
 
-  rust-http-starter:
+  gilgamesh:
     build: .
     depends_on:
       - jaeger

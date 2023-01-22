@@ -10,7 +10,7 @@ variable "azs" {
 
 variable "public_url" {
   type    = string
-  default = "http-starter.walletconnect.com"
+  default = "history.walletconnect.com"
 }
 
 variable "grafana_endpoint" {
