@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: staging
-      url: https://http-starter.walletconnect.com/health
+      url: https://gilgamesh.walletconnect.com/health
     needs:
       - get-version
     steps:
@@ -78,7 +78,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: prod
-      url: https://http-starter.walletconnect.com/health
+      url: https://gilgamesh.walletconnect.com/health
     needs:
       - get-version
       - validate-staging
