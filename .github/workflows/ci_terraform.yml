@@ -88,5 +88,5 @@ jobs:
   kick-off-release:
     needs: [fmt]
     if: github.event_name != 'pull_request'
-    uses: ./.github/workflows/release.yml
+    uses: ./.github/workflows/cd.yml
     secrets: inherit
