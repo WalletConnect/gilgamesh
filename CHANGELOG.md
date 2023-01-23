@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.3.0 - 2023-01-23
+#### Bug Fixes
+- building on terraform changes - (aa42a95) - Derek
+- workflow_call missing - (cc58883) - Derek
+#### Features
+- change error message - (16d2087) - Derek
+- improve ci/cd - (e7addd5) - Derek
+- deploy service - (4bfcca0) - Derek
+- - -
+
 ## v0.2.0 - 2023-01-23
 #### Bug Fixes
 - release broken - (44f0071) - Derek
