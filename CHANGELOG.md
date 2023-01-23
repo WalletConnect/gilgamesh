@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.3.1 - 2023-01-23
+#### Bug Fixes
+- terraform runs release - (aeb8ba6) - Derek
+- - -
+
 ## v0.3.0 - 2023-01-23
 #### Bug Fixes
 - building on terraform changes - (aa42a95) - Derek
