@@ -47,7 +47,6 @@ jobs:
         os:
           - ubuntu-latest
         rust:
-          - stable
           - nightly
         cargo:
           - name: "Clippy"
