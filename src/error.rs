@@ -14,7 +14,4 @@ pub enum Error {
 
     #[error("database migration failed: {0}")]
     DatabaseMigration(#[from] sqlx::migrate::MigrateError),
-
-    #[error(transparent)]
-    Store(#[from] crate::stores::StoreError),
 }

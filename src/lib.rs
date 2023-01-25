@@ -4,7 +4,6 @@ pub mod config;
 pub mod error;
 mod handlers;
 mod state;
-mod stores;
 
 use {
     crate::{
@@ -23,10 +22,6 @@ use {
         KeyValue,
     },
     opentelemetry_otlp::{Protocol, WithExportConfig},
-    sqlx::{
-        postgres::{PgConnectOptions, PgPoolOptions},
-        ConnectOptions,
-    },
     std::{net::SocketAddr, str::FromStr, sync::Arc, time::Duration},
     tokio::{select, sync::broadcast},
     tower::ServiceBuilder,
@@ -39,19 +34,7 @@ build_info::build_info!(fn build_info);
 pub type Result<T> = std::result::Result<T, error::Error>;
 
 pub async fn bootstap(mut shutdown: broadcast::Receiver<()>, config: Configuration) -> Result<()> {
-    let pg_options = PgConnectOptions::from_str(&config.database_url)?
-        .log_statements(LevelFilter::Debug)
-        .log_slow_statements(LevelFilter::Info, Duration::from_millis(250))
-        .clone();
-
-    let store = PgPoolOptions::new()
-        .max_connections(5)
-        .connect_with(pg_options)
-        .await?;
-
-    sqlx::migrate!("./migrations").run(&store).await?;
-
-    let mut state = AppState::new(config, Arc::new(store.clone()))?;
+    let mut state = AppState::new(config)?;
 
     // Telemetry
     if state.config.telemetry_enabled.unwrap_or(false) {

@@ -61,7 +61,6 @@ resource "aws_ecs_task_definition" "app_task_definition" {
       environment = [
         { name = "PORT", value = "8080" },
         { name = "LOG_LEVEL", value = "INFO" },
-        { name = "DATABASE_URL", value = var.database_url },
         { name = "TELEMETRY_ENABLED", value = "true" },
         { name = "TELEMETRY_GRPC_URL", value = "http://localhost:4317" },
         { name = "TELEMETRY_PROMETHEUS_PORT", value = "8081" }

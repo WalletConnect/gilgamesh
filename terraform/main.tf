@@ -47,37 +47,6 @@ module "vpc" {
   one_nat_gateway_per_az = false
 }
 
-# TODO: Remove this later
-module "database_cluster" {
-  source = "terraform-aws-modules/rds-aurora/aws"
-
-  name           = "${terraform.workspace}-${local.app_name}-database"
-  engine         = "aurora-postgresql"
-  engine_version = "13.6"
-  engine_mode    = "provisioned"
-  instance_class = "db.serverless"
-  instances = {
-    1 = {}
-  }
-
-  database_name = "postgres"
-
-  vpc_id  = module.vpc.vpc_id
-  subnets = module.vpc.private_subnets
-
-  allowed_cidr_blocks = [module.vpc.vpc_cidr_block]
-
-  storage_encrypted = true
-  apply_immediately = true
-
-  allow_major_version_upgrade = true
-
-  serverlessv2_scaling_configuration = {
-    min_capacity = 2
-    max_capacity = 10
-  }
-}
-
 module "dns" {
   source = "github.com/WalletConnect/terraform-modules.git//modules/dns"
 
@@ -98,7 +67,6 @@ module "ecs" {
 
   app_name            = "${terraform.workspace}-${local.app_name}"
   prometheus_endpoint = aws_prometheus_workspace.prometheus.prometheus_endpoint
-  database_url        = "postgres://${module.database_cluster.cluster_master_username}:${module.database_cluster.cluster_master_password}@${module.database_cluster.cluster_endpoint}:${module.database_cluster.cluster_port}/postgres"
   image               = "${data.aws_ecr_repository.repository.repository_url}:${local.version}"
   acm_certificate_arn = module.dns.certificate_arn
   cpu                 = 512

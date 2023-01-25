@@ -10,11 +10,6 @@ variable "image" {
   type = string
 }
 
-variable "database_url" {
-  type      = string
-  sensitive = true
-}
-
 variable "prometheus_endpoint" {
   type = string
 }
