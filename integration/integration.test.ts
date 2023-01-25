@@ -28,4 +28,17 @@ describe('Gilgamesh', () => {
       expect(status).toBe(200)
     })
   })
+  describe('Messages', () => {
+    const url = `${BASE_URL}/messages`
+
+    it('can read/write messages', async () => {
+      let resp = await axios.get(`${url}`)
+
+      expect(resp.status).toBe(200)
+
+      resp = await axios.post(`${url}`, {})
+
+      expect(resp.status).toBe(200)
+    })
+  })
 })
