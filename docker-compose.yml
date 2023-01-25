@@ -6,15 +6,28 @@ services:
       - "3001:16686"
 
   postgres:
+    networks:
+      - gilgamesh
     image: postgres
     environment:
       - POSTGRES_PASSWORD=root
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
   gilgamesh:
-    build: .
+    networks:
+      - gilgamesh
+    build:
+      dockerfile: ./Dockerfile-dev
+      context: .
     depends_on:
-      - jaeger
-      - postgres
+      jaeger:
+        condition: service_started
+      postgres:
+        condition: service_healthy
     ports:
       - "3000:3000"
     environment:
@@ -23,3 +36,16 @@ services:
       - DATABASE_URL=postgres://postgres:root@postgres:5432/postgres
       - TELEMETRY_ENABLED=true
       - TELEMETRY_GRPC_URL=http://jaeger:4317
+      - ATTESTATION_CACHE_URL=redis://redis:6379/0
+    volumes:
+      - ./:/gilgamesh/
+    healthcheck:
+      test: [ "CMD", "curl", "localhost:3000/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  gilgamesh:
+    ipam:
+      driver: default
