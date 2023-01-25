@@ -2,6 +2,16 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.4.0 - 2023-01-25
+#### Features
+- update integ tests - (2771f38) - Derek
+- remove postgres - (daf76dc) - Derek
+- update contract - (155fb70) - Derek
+- fmt - (2bf14d4) - Derek
+- update docker-compose setup - (1cb9109) - Derek
+- add justfile - (4e2ac7e) - Derek
+- - -
+
 ## v0.3.1 - 2023-01-23
 #### Bug Fixes
 - terraform runs release - (aeb8ba6) - Derek
