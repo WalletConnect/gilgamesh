@@ -1,3 +1,5 @@
+use axum::routing::post;
+
 pub mod config;
 pub mod error;
 mod handlers;
@@ -126,6 +128,8 @@ pub async fn bootstap(mut shutdown: broadcast::Receiver<()>, config: Configurati
 
     let app = Router::new()
         .route("/health", get(handlers::health::handler))
+        .route("/messages", get(handlers::messages::get))
+        .route("/messages", post(handlers::messages::post))
         .layer(global_middleware)
         .with_state(state_arc);
 

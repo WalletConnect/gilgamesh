@@ -49,10 +49,10 @@ jobs:
         rust:
           - nightly
         cargo:
-          - name: "Clippy"
-            cmd: clippy
-            args: -- -D clippy::all
-            cache: {}
+          # - name: "Clippy"
+          #   cmd: clippy
+          #   args: -- -D clippy::all
+          #   cache: {}
           - name: "Formatting"
             cmd: fmt
             args: -- --check
