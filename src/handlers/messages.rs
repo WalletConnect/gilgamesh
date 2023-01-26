@@ -1,5 +1,3 @@
-use axum::extract::Query;
-
 use {
     super::Response,
     crate::{
@@ -8,7 +6,7 @@ use {
         stores::messages::MongoMessages,
     },
     axum::{
-        extract::{Json, State as StateExtractor},
+        extract::{Json, Query, State as StateExtractor},
         http::StatusCode,
         response::IntoResponse,
     },
