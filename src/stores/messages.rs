@@ -7,15 +7,13 @@ pub use {
         bson::{self, doc, oid::ObjectId},
         mongodb::{
             options::{ClientOptions, FindOptions},
-            Client, Database,
+            Client,
+            Database,
         },
         Model,
     },
 };
-use {
-    crate::config::Configuration,
-    wither::mongodb::options::FindOneAndUpdateOptions,
-};
+use {crate::config::Configuration, wither::mongodb::options::FindOneAndUpdateOptions};
 
 pub type MessagesPersistentStorageArc = Arc<dyn MessagesPersistentStorage + Send + Sync + 'static>;
 
@@ -38,7 +36,6 @@ struct MongoMessages {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
     pub message_id: String,
-
     // /// The account in CAIP-10 account identifier associated and controlled with
     // /// a blockchain private key. I.e. eip155:1:
     // /// 0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826.

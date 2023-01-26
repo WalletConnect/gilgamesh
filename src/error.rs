@@ -27,7 +27,6 @@ pub enum Error {
     Database(#[from] wither::mongodb::error::Error),
 }
 
-
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
         match self {

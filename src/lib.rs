@@ -1,6 +1,7 @@
-use axum::routing::post;
-
-use crate::stores::messages::{MongoPersistentStorage, MessagesPersistentStorageArc};
+use {
+    crate::stores::messages::{MessagesPersistentStorageArc, MongoPersistentStorage},
+    axum::routing::post,
+};
 
 pub mod config;
 pub mod error;
@@ -37,7 +38,8 @@ build_info::build_info!(fn build_info);
 pub type Result<T> = std::result::Result<T, error::Error>;
 
 pub async fn bootstap(mut shutdown: broadcast::Receiver<()>, config: Configuration) -> Result<()> {
-    let persitent_storage: MessagesPersistentStorageArc = Arc::new(MongoPersistentStorage::new(&config).await?);
+    let persitent_storage: MessagesPersistentStorageArc =
+        Arc::new(MongoPersistentStorage::new(&config).await?);
     let mut state = AppState::new(config.clone(), persitent_storage)?;
 
     // Telemetry

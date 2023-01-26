@@ -1,5 +1,9 @@
 use {
-    crate::state::AppState,
+    super::Response,
+    crate::{
+        error::{self},
+        state::AppState,
+    },
     axum::{
         extract::{Json, State as StateExtractor},
         http::StatusCode,
@@ -20,7 +24,10 @@ pub async fn get(StateExtractor(state): StateExtractor<Arc<AppState>>) -> impl I
 pub async fn post(
     StateExtractor(state): StateExtractor<Arc<AppState>>,
     body: Json<PostMessagesBody>,
-) -> impl IntoResponse {
-    state.persistent_storage.upsert_message("test".into()).await;
-    (StatusCode::OK, "OK".to_string())
+) -> error::Result<Response> {
+    state
+        .persistent_storage
+        .upsert_message("test".into())
+        .await?;
+    Ok(Response::default())
 }
