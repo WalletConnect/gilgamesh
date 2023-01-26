@@ -63,7 +63,7 @@ jobs:
       SCCACHE_CACHE_SIZE: 1G
       SCCACHE_DIR: ${{ matrix.sccache-path }}
       MONGODB_HOST: mongodb
-      MONGODB_PORT: ${{ job.services.mongodb.ports[27017] }}
+      MONGODB_PORT: 27017
     steps:
       # Checkout code
       - name: "Git checkout"
