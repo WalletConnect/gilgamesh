@@ -22,6 +22,10 @@ variable "vpc_cidr" {
   type = string
 }
 
+variable "mongo_address" {
+  type = string
+}
+
 variable "route53_zone_id" {
   type = string
 }

@@ -63,7 +63,8 @@ resource "aws_ecs_task_definition" "app_task_definition" {
         { name = "LOG_LEVEL", value = "INFO" },
         { name = "TELEMETRY_ENABLED", value = "true" },
         { name = "TELEMETRY_GRPC_URL", value = "http://localhost:4317" },
-        { name = "TELEMETRY_PROMETHEUS_PORT", value = "8081" }
+        { name = "TELEMETRY_PROMETHEUS_PORT", value = "8081" },
+        { name = "MONGO_ADDRESS", value = var.mongo_address }
       ],
       dependsOn = [
         { containerName = "aws-otel-collector", condition = "START" }

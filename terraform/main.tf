@@ -78,6 +78,7 @@ module "ecs" {
   route53_zone_id     = module.dns.zone_id
   vpc_cidr            = module.vpc.vpc_cidr_block
   vpc_id              = module.vpc.vpc_id
+  mongo_address       = module.keystore-docdb.connection_url
 }
 
 module "o11y" {
@@ -86,4 +87,19 @@ module "o11y" {
   environment             = terraform.workspace
   app_name                = local.app_name
   prometheus_workspace_id = aws_prometheus_workspace.prometheus.id
+}
+
+module "keystore-docdb" {
+  source = "./docdb"
+
+  app_name                    = local.app_name
+  mongo_name                  = "keystore-docdb"
+  environment                 = terraform.workspace
+  default_database            = "keystore"
+  primary_instance_class      = var.docdb_primary_instance_class
+  primary_instances           = var.docdb_primary_instances
+  vpc_id                      = module.vpc.vpc_id
+  private_subnet_ids          = module.vpc.private_subnets
+  allowed_ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
+  allowed_egress_cidr_blocks  = [module.vpc.vpc_cidr_block]
 }
