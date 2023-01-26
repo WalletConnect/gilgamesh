@@ -1,18 +1,3 @@
-terraform {
-  required_version = "~> 1.0"
-
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.51.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "3.4.3"
-    }
-  }
-}
-
 locals {
   name_prefix     = replace("${var.environment}-${var.app_name}-${var.mongo_name}", "_", "-")
   master_password = aws_secretsmanager_secret_version.master_password.secret_string

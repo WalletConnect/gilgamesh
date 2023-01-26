@@ -1,13 +1,22 @@
 # Terraform Configuration
 terraform {
   required_version = "~> 1.0"
+
+  backend "remote" {
+    hostname     = "app.terraform.io"
+    organization = "wallet-connect"
+    workspaces {
+      prefix = "gilgamesh-"
+    }
+  }
+
   required_providers {
     assert = {
       source = "bwoznicki/assert"
     }
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.31"
+      version = "~> 4.50"
     }
     grafana = {
       source  = "grafana/grafana"
@@ -21,14 +30,5 @@ terraform {
       source  = "integrations/github"
       version = "5.7.0"
     }
-  }
-
-  backend "s3" {
-    region               = "eu-central-1"
-    bucket               = "opz"
-    workspace_key_prefix = "infra/env"
-    key                  = "apps/gilgamesh.tfstate"
-
-    force_path_style = true
   }
 }
