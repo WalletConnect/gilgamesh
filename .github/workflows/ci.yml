@@ -31,9 +31,26 @@ jobs:
     runs-on: ubuntu-latest
     services:
       mongodb:
-        image: mongo
+        image: mongo:4
         ports:
-        - 27017:27017
+          - 27017:27017
+        healthcheck:
+          test:
+            [
+              "CMD",
+              "mongo",
+              "--eval",
+              "'db.runCommand(\"ping\").ok'",
+              "localhost:27017/test",
+              "--quiet"
+            ]
+          interval: 5s
+          timeout: 5s
+          retries: 5
+        environment:
+          - MONGO_INITDB_ROOT_USERNAME=admin
+          - MONGO_INITDB_ROOT_PASSWORD=admin
+          - MONGO_INITDB_DATABASE=gilgamesh
     strategy:
       fail-fast: false
       matrix:
