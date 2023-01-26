@@ -1,3 +1,5 @@
+use crate::stores::messages::MessagesPersistentStorageArc;
+
 use {
     crate::Configuration,
     build_info::BuildInfo,
@@ -15,18 +17,20 @@ pub struct AppState {
     pub config: Configuration,
     pub build_info: BuildInfo,
     pub metrics: Option<Metrics>,
+    pub persistent_storage: MessagesPersistentStorageArc,
 }
 
 build_info::build_info!(fn build_info);
 
 impl AppState {
-    pub fn new(config: Configuration) -> crate::Result<AppState> {
+    pub fn new(config: Configuration, persistent_storage: MessagesPersistentStorageArc) -> crate::Result<AppState> {
         let build_info: &BuildInfo = build_info();
 
         Ok(AppState {
             config,
             build_info: build_info.clone(),
             metrics: None,
+            persistent_storage: persistent_storage,
         })
     }
 

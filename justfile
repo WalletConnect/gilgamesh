@@ -173,3 +173,7 @@ _bump-cargo-version version file temp=`mktemp`:
   @echo '==> Bumping {{file}} version to {{version}}'
   @perl -spe 'if (/^version/) { s/("[\w.]+")/"$version"/ }' -- -version={{version}} < {{file}} > {{temp}}
   @mv -f {{temp}} {{file}}
+
+restart-gilgamesh-docker:
+  @echo '==> Restart gilgamesh service on docker'
+  docker-compose up -d --build --force-recreate --no-deps gilgamesh

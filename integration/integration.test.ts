@@ -11,7 +11,7 @@ const BASE_URLS = new Map<string, string>([
   ['prod', 'https://history.walletconnect.com'],
   ['staging', 'https://staging.history.walletconnect.com'],
   ['dev', 'https://dev.history.walletconnect.com'],
-  ['local', 'http://localhost:3000'],
+  ['local', 'http://localhost:3002'],
 ])
 
 const TEST_TENANT = process.env.TEST_TENANT_ID_APNS

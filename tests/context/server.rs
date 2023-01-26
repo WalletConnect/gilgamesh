@@ -33,6 +33,7 @@ impl RustHttpStarter {
                     telemetry_enabled: None,
                     telemetry_grpc_url: None,
                     is_test: true,
+                    mongo_address: "mongodb://admin:admin@mongo:27017/gilgamesh?authSource=admin".into(),
                 };
 
                 gilgamesh::bootstap(shutdown, config).await

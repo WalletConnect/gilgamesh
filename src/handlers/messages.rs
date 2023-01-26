@@ -21,5 +21,6 @@ pub async fn post(
     StateExtractor(state): StateExtractor<Arc<AppState>>,
     body: Json<PostMessagesBody>,
 ) -> impl IntoResponse {
+    state.persistent_storage.upsert_message("test".into()).await;
     (StatusCode::OK, "OK".to_string())
 }
