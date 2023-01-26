@@ -789,6 +789,7 @@ dependencies = [
  "build-info-build",
  "dotenv",
  "envy",
+ "futures",
  "hyper",
  "log",
  "opentelemetry",

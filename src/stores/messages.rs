@@ -13,34 +13,32 @@ pub use {
         Model,
     },
 };
-use {crate::config::Configuration, wither::mongodb::options::FindOneAndUpdateOptions};
+use {
+    crate::config::Configuration,
+    futures::TryStreamExt,
+    wither::mongodb::options::FindOneAndUpdateOptions,
+};
 
 pub type MessagesPersistentStorageArc = Arc<dyn MessagesPersistentStorage + Send + Sync + 'static>;
 
 #[async_trait]
 pub trait MessagesPersistentStorage: 'static + std::fmt::Debug + Send + Sync {
-    async fn upsert_message(&self, message_id: &str) -> Result<(), StoreError>;
+    async fn upsert_message(&self, message_id: &str, topic: &str) -> Result<(), StoreError>;
+    async fn get_messages(&self, topic: &str) -> Result<Vec<MongoMessages>, StoreError>;
 }
 
 #[derive(Debug, Model, Serialize, Deserialize, PartialEq, Eq)]
 #[model(
     collection_name = "Messages",
     index(keys = r#"doc!{"message_id": 1}"#, options = r#"doc!{"unique": true}"#),
-    // index(
-    //     Messages = r#"doc!{"identities.identity_key": 1}"#,
-    //     options = r#"doc!{"unique": true}"#
-    // )
+    index(keys = r#"doc!{"topic": 1}"#)
 )]
-struct MongoMessages {
+pub struct MongoMessages {
     /// Mongo's default `_id` field.
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
     pub message_id: String,
-    // /// The account in CAIP-10 account identifier associated and controlled with
-    // /// a blockchain private key. I.e. eip155:1:
-    // /// 0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826.
-    // pub account: String,
-
+    pub topic: String,
     // /// TODO describe identities
     // pub identities: Vec<MongoIdentity>,
 
@@ -72,7 +70,7 @@ impl MongoPersistentStorage {
 
 #[async_trait]
 impl MessagesPersistentStorage for MongoPersistentStorage {
-    async fn upsert_message(&self, message_id: &str) -> Result<(), StoreError> {
+    async fn upsert_message(&self, message_id: &str, topic: &str) -> Result<(), StoreError> {
         let filter = doc! {
             "message_id": &message_id,
         };
@@ -80,6 +78,7 @@ impl MessagesPersistentStorage for MongoPersistentStorage {
         let update = doc! {
             "$set": {
                 "message_id": &message_id,
+                "topic": &topic,
             }
         };
 
@@ -90,5 +89,19 @@ impl MessagesPersistentStorage for MongoPersistentStorage {
                 message_id.to_string(),
             )),
         }
+    }
+
+    async fn get_messages(&self, topic: &str) -> Result<Vec<MongoMessages>, StoreError> {
+        let filter = doc! {
+            "topic": &topic,
+        };
+
+        let options = FindOptions::builder().sort(doc! {"message_id": 1}).build();
+
+        let cursor = MongoMessages::find(&self.db, filter, options).await?;
+
+        let messages: Vec<MongoMessages> = cursor.try_collect().await?;
+
+        Ok(messages)
     }
 }
