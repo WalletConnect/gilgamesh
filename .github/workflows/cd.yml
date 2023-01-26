@@ -15,14 +15,15 @@ jobs:
     outputs:
       version: ${{ steps.clean_version.outputs.version }}
     steps:
-      - id: latest_release
+      - name: Get latest release for image version
+        id: latest_release
         uses: pozetroninc/github-action-get-latest-release@master
-        if: github.event_name != 'release'
         with:
           repository: ${{ github.repository }}
           excludes: draft
 
-      - id: get
+      - name: Get release value
+        id: get_value
         uses: actions/github-script@v6
         env:
           LATEST_TAG: ${{ steps.latest_release.outputs.release }}
@@ -35,58 +36,43 @@ jobs:
               return process.env.LATEST_TAG
             }
 
-      - id: clean_version
+      - name: Clean version
+        id: clean_version
         run: |
-          version=$(echo "${{ steps.get.outputs.result }}" | sed 's/v//g')
+          version=$(echo "${{ steps.get_value.outputs.result }}" | sed 's/v//g')
           echo "version=$version" >> $GITHUB_OUTPUT
 
   deploy-infra-staging:
-    runs-on: ubuntu-latest
-    environment:
-      name: staging
-      url: https://gilgamesh.walletconnect.com/health
     needs:
       - get-version
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - id: deploy-staging
-        uses: WalletConnect/actions/actions/deploy-terraform/@master
-        env:
-          TF_VAR_image_version: ${{ needs.get-version.outputs.version }}
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-central-1
-          environment: staging
-          app-name: ${{ github.event.repository.name }}
+    uses: ./.github/workflows/deploy-infra.yml
+    secrets: inherit
+    with:
+      version: ${{ needs.get-version.outputs.version }}
+      environment: 'staging'
+      environment_url: https://staging.gilgamesh.walletconnect.com/health
 
   validate-staging:
-    needs: [deploy-infra-staging]
+    needs:
+      - deploy-infra-staging
     uses: ./.github/workflows/validate.yml
     with:
       environment: 'staging'
 
   deploy-infra-prod:
-    runs-on: ubuntu-latest
-    environment:
-      name: prod
-      url: https://gilgamesh.walletconnect.com/health
     needs:
       - get-version
       - validate-staging
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+    uses: ./.github/workflows/deploy-infra.yml
+    secrets: inherit
+    with:
+      version: ${{ needs.get-version.outputs.version }}
+      environment: 'prod'
+      environment_url: https://gilgamesh.walletconnect.com/health
 
-      - id: deploy-staging
-        uses: WalletConnect/actions/actions/deploy-terraform/@master
-        env:
-          TF_VAR_image_version: ${{ needs.get-version.outputs.version }}
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-central-1
-          environment: prod
-          app-name: ${{ github.event.repository.name }}
+  validate-prod:
+    needs:
+      - deploy-infra-prod
+    uses: ./.github/workflows/validate.yml
+    with:
+      environment: 'prod'

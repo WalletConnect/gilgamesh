@@ -5,23 +5,14 @@ locals {
   version             = coalesce(var.image_version, substr(local.latest_release_name, 1, length(local.latest_release_name)))
 }
 
-data "assert_test" "workspace" {
-  test  = terraform.workspace != "default"
-  throw = "default workspace is not valid in this project"
-}
-
 data "github_release" "latest_release" {
   repository  = "gilgamesh"
   owner       = "walletconnect"
   retrieve_by = "latest"
 }
 
-module "tags" {
-  source = "github.com/WalletConnect/terraform-modules.git//modules/tags"
-
-  application = local.app_name
-  env         = terraform.workspace
-}
+////////////////////////////////////////////////////////////////////////////////
+// Networking
 
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
@@ -54,9 +45,27 @@ module "dns" {
   fqdn             = local.fqdn
 }
 
-resource "aws_prometheus_workspace" "prometheus" {
-  alias = "prometheus-${terraform.workspace}-${local.app_name}"
+////////////////////////////////////////////////////////////////////////////////
+// Data Stores
+
+module "keystore-docdb" {
+  source = "./docdb"
+
+  app_name                    = local.app_name
+  mongo_name                  = "keystore-docdb"
+  environment                 = terraform.workspace
+  default_database            = "keystore"
+  primary_instance_class      = var.docdb_primary_instance_class
+  primary_instances           = var.docdb_primary_instances
+  vpc_id                      = module.vpc.vpc_id
+  private_subnet_ids          = module.vpc.private_subnets
+  allowed_ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
+  allowed_egress_cidr_blocks  = [module.vpc.vpc_cidr_block]
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Application
 
 data "aws_ecr_repository" "repository" {
   name = "gilgamesh"
@@ -81,25 +90,17 @@ module "ecs" {
   mongo_address       = module.keystore-docdb.connection_url
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Monitoring
+
+resource "aws_prometheus_workspace" "prometheus" {
+  alias = "prometheus-${terraform.workspace}-${local.app_name}"
+}
+
 module "o11y" {
   source = "./monitoring"
 
   environment             = terraform.workspace
   app_name                = local.app_name
   prometheus_workspace_id = aws_prometheus_workspace.prometheus.id
-}
-
-module "keystore-docdb" {
-  source = "./docdb"
-
-  app_name                    = local.app_name
-  mongo_name                  = "keystore-docdb"
-  environment                 = terraform.workspace
-  default_database            = "keystore"
-  primary_instance_class      = var.docdb_primary_instance_class
-  primary_instances           = var.docdb_primary_instances
-  vpc_id                      = module.vpc.vpc_id
-  private_subnet_ids          = module.vpc.private_subnets
-  allowed_ingress_cidr_blocks = [module.vpc.vpc_cidr_block]
-  allowed_egress_cidr_blocks  = [module.vpc.vpc_cidr_block]
 }
