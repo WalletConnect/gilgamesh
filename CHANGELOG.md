@@ -2,6 +2,28 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.6.0 - 2023-01-26
+#### Bug Fixes
+- run mongo tests - (bc4f3d6) - Derek
+- run mongo tests - (6fa24f5) - Derek
+- run mongo tests - (ea6b37a) - Derek
+- run mongo tests - (372d4f4) - Derek
+- ci failing - (49cf7bc) - Derek
+- ci failing - (34af6cc) - Derek
+- attempt to fix unit tests - (d8622ed) - Derek
+- ci broken - (994a461) - Derek
+#### Features
+- store messages - (74d7c9b) - Derek
+- store messages - (5e7fae8) - Derek
+- Move to Terraform Cloud (#2) - (e951ed0) - Xavier Basty
+- configure document db - (2f734d5) - Derek
+- write to db - (7d0a895) - Derek
+- store messages - (2b8be9a) - Derek
+- add mongodb - (e4e9d40) - Derek
+#### Miscellaneous Chores
+- fmt - (f5ddf61) - Derek
+- - -
+
 ## v0.5.0 - 2023-01-26
 #### Bug Fixes
 - mongo ci - (d028667) - Derek
