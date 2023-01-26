@@ -29,11 +29,6 @@ jobs:
   tasks:
     name: "[${{ matrix.os }}/rust-${{matrix.rust}}] ${{ matrix.cargo.name }}"
     runs-on: ubuntu-latest
-    services:
-      mongodb:
-        image: mongo:4
-        ports:
-          - 27017:27017
     strategy:
       fail-fast: false
       matrix:
@@ -62,7 +57,6 @@ jobs:
       RUSTC_WRAPPER: sccache
       SCCACHE_CACHE_SIZE: 1G
       SCCACHE_DIR: ${{ matrix.sccache-path }}
-      MONGO_ADDRESS: mongodb://mongodb:27017/dbName
     steps:
       # Checkout code
       - name: "Git checkout"
@@ -110,8 +104,16 @@ jobs:
           sccache --stop-server || true
           sccache --start-server
 
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.8.0
+        with:
+          mongodb-version: '4.4'
+          mongodb-db: gilgamesh
+
       - name: "Task ${{ matrix.cargo.name }}"
         uses: actions-rs/cargo@v1
+        env:
+          MONGO_ADDRESS: mongodb://localhost:27017/gilgamesh
         with:
           command: ${{ matrix.cargo.cmd }}
           args: ${{ matrix.cargo.args }}
