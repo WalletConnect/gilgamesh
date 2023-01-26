@@ -34,19 +34,6 @@ jobs:
         image: mongo:4
         ports:
           - 27017:27017
-        healthcheck:
-          test:
-            [
-              "CMD",
-              "mongo",
-              "--eval",
-              "'db.runCommand(\"ping\").ok'",
-              "localhost:27017/test",
-              "--quiet"
-            ]
-          interval: 5s
-          timeout: 5s
-          retries: 5
         environment:
           - MONGO_INITDB_ROOT_USERNAME=admin
           - MONGO_INITDB_ROOT_PASSWORD=admin
@@ -79,7 +66,7 @@ jobs:
       RUSTC_WRAPPER: sccache
       SCCACHE_CACHE_SIZE: 1G
       SCCACHE_DIR: ${{ matrix.sccache-path }}
-      MONGO_ADDRESS: mongodb://admin:admin@mongodb:27017/gilgamesh?authSource=admin
+      MONGO_ADDRESS: mongodb://mongodb:27017/gilgamesh
     steps:
       # Checkout code
       - name: "Git checkout"
