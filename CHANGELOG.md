@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.5.0 - 2023-01-26
+#### Bug Fixes
+- mongo ci - (d028667) - Derek
+#### Features
+- add mongo - (a22b696) - Derek
+- - -
+
 ## v0.4.0 - 2023-01-25
 #### Features
 - update integ tests - (2771f38) - Derek
