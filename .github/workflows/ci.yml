@@ -29,18 +29,11 @@ jobs:
   tasks:
     name: "[${{ matrix.os }}/rust-${{matrix.rust}}] ${{ matrix.cargo.name }}"
     runs-on: ubuntu-latest
-    # services:
-    #   postgres:
-    #     image: postgres
-    #     env:
-    #       POSTGRES_HOST_AUTH_METHOD: trust
-    #     ports:
-    #       - 5432:5432
-    #     options: >-
-    #       --health-cmd pg_isready
-    #       --health-interval 10s
-    #       --health-timeout 5s
-    #       --health-retries 5
+    services:
+      mongodb:
+        image: mongo
+        ports:
+        - 27017:27017
     strategy:
       fail-fast: false
       matrix:
@@ -69,6 +62,8 @@ jobs:
       RUSTC_WRAPPER: sccache
       SCCACHE_CACHE_SIZE: 1G
       SCCACHE_DIR: ${{ matrix.sccache-path }}
+      MONGODB_HOST: mongodb
+      MONGODB_PORT: ${{ job.services.mongodb.ports[27017] }}
     steps:
       # Checkout code
       - name: "Git checkout"
