@@ -1,6 +1,9 @@
 use {
     gilgamesh::config::Configuration,
-    std::net::{IpAddr, Ipv4Addr, SocketAddr, SocketAddrV4, TcpListener},
+    std::{
+        env,
+        net::{IpAddr, Ipv4Addr, SocketAddr, SocketAddrV4, TcpListener},
+    },
     tokio::{
         runtime::Handle,
         sync::broadcast,
@@ -27,14 +30,17 @@ impl RustHttpStarter {
 
         std::thread::spawn(move || {
             rt.block_on(async move {
+                let mongo_address = match env::var("MONGO_ADDRESS") {
+                    Ok(val) => val,
+                    Err(_) => "mongodb://admin:admin@mongo:27017/gilgamesh?authSource=admin".into(),
+                };
                 let config: Configuration = Configuration {
                     port: public_port,
                     log_level: "INFO".into(),
                     telemetry_enabled: None,
                     telemetry_grpc_url: None,
                     is_test: true,
-                    mongo_address: "mongodb://admin:admin@mongo:27017/gilgamesh?authSource=admin"
-                        .into(),
+                    mongo_address,
                 };
 
                 gilgamesh::bootstap(shutdown, config).await
