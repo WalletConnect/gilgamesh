@@ -82,12 +82,11 @@ impl MessagesPersistentStorage for MongoPersistentStorage {
             }
         };
 
-        match MongoMessages::find_one_and_update(&self.db, filter, update, None).await? {
+        let option = FindOneAndUpdateOptions::builder().upsert(true).build();
+
+        match MongoMessages::find_one_and_update(&self.db, filter, update, option).await? {
             Some(_) => Ok(()),
-            None => Err(StoreError::NotFound(
-                "Message".to_string(),
-                message_id.to_string(),
-            )),
+            None => Ok(()),
         }
     }
 

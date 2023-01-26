@@ -1,3 +1,5 @@
+use axum::extract::Query;
+
 use {
     super::Response,
     crate::{
@@ -22,8 +24,7 @@ pub struct PostMessagesBody {
     pub topic: String,
 }
 
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Deserialize)]
 pub struct GetMessagesBody {
     pub topic: String,
 }
@@ -42,11 +43,11 @@ impl From<GetMessagesResponse> for Value {
 
 pub async fn get(
     StateExtractor(state): StateExtractor<Arc<AppState>>,
-    body: Json<PostMessagesBody>,
+    topic: Query<GetMessagesBody>,
 ) -> error::Result<Response> {
     let messages: Vec<MongoMessages> = state
         .persistent_storage
-        .get_messages(body.topic.as_str())
+        .get_messages(topic.topic.as_str())
         .await?;
     let response = GetMessagesResponse { messages };
     Ok(Response::new_success_with_value(

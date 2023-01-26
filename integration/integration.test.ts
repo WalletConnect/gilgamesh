@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { v4 as uuid } from 'uuid'
 
 declare let process: {
   env: {
@@ -11,10 +12,8 @@ const BASE_URLS = new Map<string, string>([
   ['prod', 'https://history.walletconnect.com'],
   ['staging', 'https://staging.history.walletconnect.com'],
   ['dev', 'https://dev.history.walletconnect.com'],
-  ['local', 'http://localhost:3002'],
+  ['local', 'http://localhost:3000'],
 ])
-
-const TEST_TENANT = process.env.TEST_TENANT_ID_APNS
 
 const BASE_URL = BASE_URLS.get(process.env.JEST_ENV)
 
@@ -32,13 +31,19 @@ describe('Gilgamesh', () => {
     const url = `${BASE_URL}/messages`
 
     it('can read/write messages', async () => {
-      let resp = await axios.get(`${url}`)
+      const topic = uuid();
+      let resp = await axios.post(`${url}`, {
+        topic,
+        'messageId': uuid(),
+      })
 
       expect(resp.status).toBe(200)
 
-      resp = await axios.post(`${url}`, {})
+      resp = await axios.get(`${url}`, { params: { topic } })
 
       expect(resp.status).toBe(200)
+      console.log(resp.data)
+      expect(resp.data.value.messages.length).toBe(1)
     })
   })
 })
