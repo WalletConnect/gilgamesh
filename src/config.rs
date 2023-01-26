@@ -9,6 +9,7 @@ pub struct Configuration {
     #[serde(default = "default_is_test", skip)]
     /// This is an internal flag to disable logging, cannot be defined by user
     pub is_test: bool,
+    pub mongo_address: String,
 
     // TELEMETRY
     pub telemetry_enabled: Option<bool>,

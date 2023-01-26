@@ -1,9 +1,12 @@
 use axum::routing::post;
 
+use crate::stores::messages::MongoPersistentStorage;
+
 pub mod config;
 pub mod error;
 mod handlers;
 mod state;
+mod stores;
 
 use {
     crate::{
@@ -34,7 +37,8 @@ build_info::build_info!(fn build_info);
 pub type Result<T> = std::result::Result<T, error::Error>;
 
 pub async fn bootstap(mut shutdown: broadcast::Receiver<()>, config: Configuration) -> Result<()> {
-    let mut state = AppState::new(config)?;
+    let mut state = AppState::new(config.clone())?;
+    let persitent_storage = Arc::new(MongoPersistentStorage::new(&config).await?);
 
     // Telemetry
     if state.config.telemetry_enabled.unwrap_or(false) {

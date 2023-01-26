@@ -5,18 +5,6 @@ services:
     ports:
       - "3001:16686"
 
-  postgres:
-    networks:
-      - gilgamesh
-    image: postgres
-    environment:
-      - POSTGRES_PASSWORD=root
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   mongo:
     image: mongo:4
     networks:
@@ -64,15 +52,13 @@ services:
     depends_on:
       jaeger:
         condition: service_started
-      postgres:
-        condition: service_healthy
     ports:
       - "3000:3000"
     environment:
       - PORT=3000
       - LOG_LEVEL=INFO
-      - DATABASE_URL=postgres://postgres:root@postgres:5432/postgres
       - TELEMETRY_ENABLED=true
+      - MONGO_ADDR=mongodb://admin:admin@mongo:27017/gilgamesh?authSource=admin
       - TELEMETRY_GRPC_URL=http://jaeger:4317
       - ATTESTATION_CACHE_URL=redis://redis:6379/0
     volumes:

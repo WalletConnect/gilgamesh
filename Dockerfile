@@ -50,6 +50,9 @@ RUN                 cargo chef cook --recipe-path recipe.json ${RELEASE}
 # Build the local binary
 COPY                . .
 RUN                 cargo build --bin gilgamesh ${RELEASE}
+# Certificate file required to use TLS with AWS DocumentDB.
+RUN                 wget https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem
+
 
 ################################################################################
 #
@@ -71,6 +74,7 @@ LABEL               maintainer=${maintainer}
 
 WORKDIR             /app
 COPY --from=build   /app/target/${binpath:-debug}/gilgamesh /usr/local/bin/gilgamesh
+COPY --from=build   /app/rds-combined-ca-bundle.pem /app/rds-combined-ca-bundle.pem
 RUN                 apt-get update \
                         && apt-get install -y --no-install-recommends ca-certificates libssl-dev \
                         && apt-get clean \
