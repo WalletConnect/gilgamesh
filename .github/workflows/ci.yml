@@ -62,7 +62,7 @@ jobs:
       RUSTC_WRAPPER: sccache
       SCCACHE_CACHE_SIZE: 1G
       SCCACHE_DIR: ${{ matrix.sccache-path }}
-      MONGO_ADDRESS: mongodb://mongodb:27017/gilgamesh
+      MONGO_ADDRESS: mongodb://mongodb:${{ job.services.mongodb.ports[27017] }}/gilgamesh
     steps:
       # Checkout code
       - name: "Git checkout"
