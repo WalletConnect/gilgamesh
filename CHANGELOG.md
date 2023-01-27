@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.6.1 - 2023-01-27
+#### Bug Fixes
+- **(revert)** tf attempting to deploy the wrong version" - (93e1b3d) - Derek
+- tf attempting to deploy the wrong version - (4614cee) - Derek
+- - -
+
 ## v0.6.0 - 2023-01-26
 #### Bug Fixes
 - run mongo tests - (bc4f3d6) - Derek
