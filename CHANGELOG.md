@@ -2,6 +2,11 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v0.6.3 - 2023-01-31
+#### Bug Fixes
+- step ref name for grafana endpoint (#3) (#4) - (31ff8f8) - Xavier Basty
+- - -
+
 ## v0.6.2 - 2023-01-31
 #### Bug Fixes
 - step ref name for grafana key (#3) - (23db36b) - Xavier Basty
