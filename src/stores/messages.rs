@@ -21,6 +21,7 @@ use {
 };
 
 pub type MessagesPersistentStorageArc = Arc<dyn MessagesPersistentStorage + Send + Sync + 'static>;
+pub type GetMessagesResponse = (Vec<MongoMessages>, Option<String>);
 
 pub struct GetMessagesResponse {
     pub messages: Vec<MongoMessages>,
