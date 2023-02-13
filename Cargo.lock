@@ -780,13 +780,14 @@ dependencies = [
 
 [[package]]
 name = "gilgamesh"
-version = "0.6.2"
+version = "0.6.3"
 dependencies = [
  "anyhow",
  "async-trait",
  "axum",
  "build-info",
  "build-info-build",
+ "chrono",
  "dotenv",
  "envy",
  "futures",

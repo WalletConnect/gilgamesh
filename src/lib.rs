@@ -26,7 +26,7 @@ use {
         KeyValue,
     },
     opentelemetry_otlp::{Protocol, WithExportConfig},
-    std::{net::SocketAddr, str::FromStr, sync::Arc, time::Duration},
+    std::{net::SocketAddr, sync::Arc, time::Duration},
     tokio::{select, sync::broadcast},
     tower::ServiceBuilder,
     tracing::info,
