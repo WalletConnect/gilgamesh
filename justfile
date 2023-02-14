@@ -50,33 +50,33 @@ clean:
 
 # Build docker image
 build-docker:
-  @echo '=> Build rs-relay docker image'
-  docker-compose -f ./ops/docker-compose.relay.yml -f ./ops/docker-compose.storage.yml build rs-relay-srv1
+  @echo '=> Build gilgamesh docker image'
+  docker-compose -f ./ops/docker-compose.gilgamesh.yml -f ./ops/docker-compose.storage.yml build gilgamesh
 
-# Start relay & storage services on docker
+# Start gilgamesh & storage services on docker
 run-docker:
   @echo '==> Start services on docker'
-  @echo '==> Use run rs-relay app on docker with "cargo-watch"'
+  @echo '==> Use run gilgamesh app on docker with "cargo-watch"'
   @echo '==> for more details check https://crates.io/crates/cargo-watch'
-  docker-compose -f ./ops/docker-compose.relay.yml -f ./ops/docker-compose.storage.yml up -d
+  docker-compose -f ./ops/docker-compose.gilgamesh.yml -f ./ops/docker-compose.storage.yml up -d
 
-# Stop relay & storage services on docker
+# Stop gilgamesh & storage services on docker
 stop-docker:
   @echo '==> Stop services on docker'
-  docker-compose -f ./ops/docker-compose.relay.yml -f ./ops/docker-compose.storage.yml down
+  docker-compose -f ./ops/docker-compose.gilgamesh.yml -f ./ops/docker-compose.storage.yml down
 
-# Clean up docker relay & storage services
+# Clean up docker gilgamesh & storage services
 clean-docker:
   @echo '==> Clean services on docker'
-  docker-compose  -f ./ops/docker-compose.relay.yml -f ./ops/docker-compose.storage.yml stop
-  docker-compose -f ./ops/docker-compose.relay.yml -f ./ops/docker-compose.storage.yml rm -f
+  docker-compose  -f ./ops/docker-compose.gilgamesh.yml -f ./ops/docker-compose.storage.yml stop
+  docker-compose -f ./ops/docker-compose.gilgamesh.yml -f ./ops/docker-compose.storage.yml rm -f
 
 # Start storage services on docker
 run-storage-docker:
   @echo '==> Start storage services on docker'
   docker-compose -f ./ops/docker-compose.storage.yml up -d
 
-# Stop relay & storage services on docker
+# Stop gilgamesh & storage services on docker
 stop-storage-docker:
   @echo '==> Stop storage services on docker'
   docker-compose -f ./ops/docker-compose.storage.yml down
@@ -90,12 +90,12 @@ clean-storage-docker:
 # List services running on docker
 ps-docker:
   @echo '==> List services on docker'
-  docker-compose -f ./ops/docker-compose.relay.yml -f ./ops/docker-compose.storage.yml ps
+  docker-compose -f ./ops/docker-compose.gilgamesh.yml -f ./ops/docker-compose.storage.yml ps
 
 # Run project test suite on docker containers
 test-docker:
   @echo '==> Run tests on docker container'
-  docker-compose -f ./ops/docker-compose.storage.yml -f ./ops/docker-compose.test.yml run --rm rs-relay-test
+  docker-compose -f ./ops/docker-compose.storage.yml -f ./ops/docker-compose.test.yml run --rm gilgamesh-test
 
 run-jaeger:
   @echo '==> Run opentelemetry jaeger docker container'
