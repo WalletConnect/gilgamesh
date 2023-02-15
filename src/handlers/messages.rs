@@ -3,7 +3,7 @@ use {
     crate::{
         error::{self},
         state::AppState,
-        stores::messages::MongoMessages,
+        stores::{self, messages::MongoMessages},
     },
     axum::{
         extract::{Json, Query, State as StateExtractor},
@@ -14,7 +14,7 @@ use {
     std::{cmp, sync::Arc},
 };
 
-const MAX_MESSAGE_COUNT: u32 = 500;
+const MAX_MESSAGE_COUNT: usize = 500;
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -32,7 +32,7 @@ pub enum Direction {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct MessageCount(u32);
+pub struct MessageCount(usize);
 
 impl Default for MessageCount {
     fn default() -> Self {
@@ -41,7 +41,7 @@ impl Default for MessageCount {
 }
 
 impl MessageCount {
-    pub fn limit(&self) -> u32 {
+    pub fn limit(&self) -> usize {
         cmp::min(self.0, MAX_MESSAGE_COUNT)
     }
 }
@@ -78,28 +78,29 @@ pub async fn get(
     let direction = query.direction.unwrap_or(Direction::Forward);
     let topic = query.topic.clone();
 
-    let (messages, next_id) = match (&query.origin_id, direction) {
-        (origin_id, Direction::Forward) => {
-            state
-                .persistent_storage
-                .get_messages_after(
-                    topic.as_str(),
-                    origin_id.as_deref(),
-                    query.message_count.limit(),
-                )
-                .await?
-        }
-        (origin_id, Direction::Backward) => {
-            state
-                .persistent_storage
-                .get_messages_before(
-                    query.topic.as_str(),
-                    origin_id.as_deref(),
-                    query.message_count.limit(),
-                )
-                .await?
-        }
-    };
+    let stores::messages::GetMessagesResponse { messages, next_id } =
+        match (&query.origin_id, direction) {
+            (origin_id, Direction::Forward) => {
+                state
+                    .persistent_storage
+                    .get_messages_after(
+                        topic.as_str(),
+                        origin_id.as_deref(),
+                        query.message_count.limit(),
+                    )
+                    .await?
+            }
+            (origin_id, Direction::Backward) => {
+                state
+                    .persistent_storage
+                    .get_messages_before(
+                        query.topic.as_str(),
+                        origin_id.as_deref(),
+                        query.message_count.limit(),
+                    )
+                    .await?
+            }
+        };
 
     let response = GetMessagesResponse {
         topic,
@@ -119,7 +120,7 @@ pub async fn post(
 ) -> error::Result<Response> {
     state
         .persistent_storage
-        .upsert_message(body.message_id.as_str(), body.topic.as_str())
+        .upsert_message(body.topic.as_str(), body.message_id.as_str())
         .await?;
     Ok(Response::default())
 }

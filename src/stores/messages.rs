@@ -21,7 +21,11 @@ use {
 };
 
 pub type MessagesPersistentStorageArc = Arc<dyn MessagesPersistentStorage + Send + Sync + 'static>;
-pub type GetMessagesResponse = (Vec<MongoMessages>, Option<String>);
+
+pub struct GetMessagesResponse {
+    pub messages: Vec<MongoMessages>,
+    pub next_id: Option<String>,
+}
 
 #[async_trait]
 pub trait MessagesPersistentStorage: 'static + std::fmt::Debug + Send + Sync {
@@ -30,13 +34,13 @@ pub trait MessagesPersistentStorage: 'static + std::fmt::Debug + Send + Sync {
         &self,
         topic: &str,
         origin: Option<&str>,
-        message_count: u32,
+        message_count: usize,
     ) -> Result<GetMessagesResponse, StoreError>;
     async fn get_messages_before(
         &self,
         topic: &str,
         origin: Option<&str>,
-        message_count: u32,
+        message_count: usize,
     ) -> Result<GetMessagesResponse, StoreError>;
 }
 
@@ -111,7 +115,7 @@ impl MongoPersistentStorage {
         &self,
         topic: &str,
         origin: Option<&str>,
-        message_count: u32,
+        message_count: usize,
         comparator: &str,
         sort_order: i32,
     ) -> Result<GetMessagesResponse, StoreError> {
@@ -129,9 +133,10 @@ impl MongoPersistentStorage {
         };
         let filter = filter?;
 
-        let limit = i64::from(message_count + 1) * -1;
+        let message_count: i64 = message_count as i64;
+        let limit = -(message_count + 1);
         let options = FindOptions::builder()
-            .sort(doc! {"message_id": sort_order})
+            .sort(doc! {"ts": sort_order})
             .limit(limit)
             .build();
 
@@ -140,17 +145,20 @@ impl MongoPersistentStorage {
         let mut messages: Vec<MongoMessages> = cursor.try_collect().await?;
 
         if messages.len() > message_count as usize {
-            let last_item = messages.pop().map(|message| message.message_id);
-            return Ok((messages, last_item));
+            let next_id = messages.pop().map(|message| message.message_id);
+            return Ok(GetMessagesResponse { messages, next_id });
         }
 
-        Ok((messages, None))
+        Ok(GetMessagesResponse {
+            messages,
+            next_id: None,
+        })
     }
 }
 
 #[async_trait]
 impl MessagesPersistentStorage for MongoPersistentStorage {
-    async fn upsert_message(&self, message_id: &str, topic: &str) -> Result<(), StoreError> {
+    async fn upsert_message(&self, topic: &str, message_id: &str) -> Result<(), StoreError> {
         let filter = doc! {
             "message_id": &message_id,
         };
@@ -175,7 +183,7 @@ impl MessagesPersistentStorage for MongoPersistentStorage {
         &self,
         topic: &str,
         origin: Option<&str>,
-        message_count: u32,
+        message_count: usize,
     ) -> Result<GetMessagesResponse, StoreError> {
         self.get_messages(topic, origin, message_count, "$gte", 1)
             .await
@@ -185,7 +193,7 @@ impl MessagesPersistentStorage for MongoPersistentStorage {
         &self,
         topic: &str,
         origin: Option<&str>,
-        message_count: u32,
+        message_count: usize,
     ) -> Result<GetMessagesResponse, StoreError> {
         self.get_messages(topic, origin, message_count, "$lte", -1)
             .await

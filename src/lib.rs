@@ -7,7 +7,7 @@ pub mod config;
 pub mod error;
 mod handlers;
 mod state;
-mod stores;
+pub mod stores;
 
 use {
     crate::{

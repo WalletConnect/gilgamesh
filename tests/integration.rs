@@ -1,8 +1,10 @@
+extern crate core;
+
 // mod env;
 // mod providers;
-// mod store; // Comment this out for now
 mod context;
 mod functional;
+mod store;
 
 pub type ErrorResult<T> = Result<T, TestError>;
 
