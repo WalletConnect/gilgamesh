@@ -23,6 +23,7 @@ impl AsyncTestContext for ServerContext {
     }
 }
 
+#[derive(Clone)]
 pub struct StoreContext {
     pub storage: PersistentStorage,
 }

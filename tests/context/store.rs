@@ -3,6 +3,7 @@ use {
     std::env,
 };
 
+#[derive(Clone)]
 pub struct PersistentStorage {
     pub store: MongoPersistentStorage,
 }

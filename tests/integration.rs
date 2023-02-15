@@ -14,5 +14,5 @@ pub enum TestError {
     Elapsed(#[from] tokio::time::error::Elapsed),
 
     #[error(transparent)]
-    RustHttpStarter(#[from] gilgamesh::error::Error),
+    Gilgamesh(#[from] gilgamesh::error::Error),
 }

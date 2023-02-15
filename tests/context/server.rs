@@ -49,7 +49,7 @@ impl Gilgamesh {
         });
 
         if let Err(e) = wait_for_server_to_start(public_port).await {
-            panic!("Failed to start server with error: {:?}", e)
+            panic!("Failed to start server with error: {e:?}")
         }
 
         Self {

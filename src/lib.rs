@@ -1,8 +1,3 @@
-use {
-    crate::stores::messages::{MessagesPersistentStorageArc, MongoPersistentStorage},
-    axum::routing::post,
-};
-
 pub mod config;
 pub mod error;
 mod handlers;
@@ -13,9 +8,12 @@ use {
     crate::{
         config::Configuration,
         state::{AppState, Metrics},
+        stores::messages::{MessagesPersistentStorageArc, MongoPersistentStorage},
     },
-    axum::{routing::get, Router},
-    log::LevelFilter,
+    axum::{
+        routing::{get, post},
+        Router,
+    },
     opentelemetry::{
         sdk::{
             metrics::selectors,

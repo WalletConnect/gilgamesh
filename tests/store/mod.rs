@@ -2,18 +2,27 @@ use {
     crate::context::StoreContext,
     core::time,
     gilgamesh::stores::messages::MessagesPersistentStorage,
-    std::thread,
     test_context::test_context,
 };
 
-const TEST_TOPIC: &str = "1234";
+const TEST_TOPIC: &str = "123456789";
 const TEST_QUERY_SIZE: usize = 3;
 
 #[test_context(StoreContext)]
 #[tokio::test]
-async fn after_no_origin(ctx: &mut StoreContext) {
-    fill_store(ctx, 20).await;
+async fn test_get_messages(ctx: &mut StoreContext) {
+    fill_store(ctx, TEST_TOPIC, 20).await;
+    futures::join!(
+        test_after_no_origin(ctx),
+        test_after_origin(ctx),
+        test_after_origin_overflow(ctx),
+        test_before_no_origin(ctx),
+        test_before_origin(ctx),
+        test_before_origin_overflow(ctx),
+    );
+}
 
+async fn test_after_no_origin(ctx: &StoreContext) {
     let result = ctx
         .storage
         .store
@@ -40,11 +49,7 @@ async fn after_no_origin(ctx: &mut StoreContext) {
     assert_eq!(result.next_id, Some("4".to_string()), "Check next_id");
 }
 
-#[test_context(StoreContext)]
-#[tokio::test]
-async fn after_origin(ctx: &mut StoreContext) {
-    fill_store(ctx, 20).await;
-
+async fn test_after_origin(ctx: &StoreContext) {
     let origin = 4;
 
     let result = ctx
@@ -77,11 +82,7 @@ async fn after_origin(ctx: &mut StoreContext) {
     );
 }
 
-#[test_context(StoreContext)]
-#[tokio::test]
-async fn after_origin_overflow(ctx: &mut StoreContext) {
-    fill_store(ctx, 20).await;
-
+async fn test_after_origin_overflow(ctx: &StoreContext) {
     let origin = 19;
 
     let result = ctx
@@ -106,11 +107,7 @@ async fn after_origin_overflow(ctx: &mut StoreContext) {
     assert_eq!(result.next_id, None, "Check next_id");
 }
 
-#[test_context(StoreContext)]
-#[tokio::test]
-async fn before_no_origin(ctx: &mut StoreContext) {
-    fill_store(ctx, 20).await;
-
+async fn test_before_no_origin(ctx: &StoreContext) {
     let result = ctx
         .storage
         .store
@@ -137,11 +134,7 @@ async fn before_no_origin(ctx: &mut StoreContext) {
     assert_eq!(result.next_id, Some("17".to_string()), "Check next_id");
 }
 
-#[test_context(StoreContext)]
-#[tokio::test]
-async fn before_origin(ctx: &mut StoreContext) {
-    fill_store(ctx, 20).await;
-
+async fn test_before_origin(ctx: &StoreContext) {
     let origin = 16;
 
     let result = ctx
@@ -174,11 +167,7 @@ async fn before_origin(ctx: &mut StoreContext) {
     );
 }
 
-#[test_context(StoreContext)]
-#[tokio::test]
-async fn before_origin_overflow(ctx: &mut StoreContext) {
-    fill_store(ctx, 20).await;
-
+async fn test_before_origin_overflow(ctx: &StoreContext) {
     let origin = 2;
 
     let result = ctx
@@ -203,13 +192,13 @@ async fn before_origin_overflow(ctx: &mut StoreContext) {
     assert_eq!(result.next_id, None, "Check next_id");
 }
 
-async fn fill_store(ctx: &mut StoreContext, size: i32) {
+async fn fill_store(ctx: &StoreContext, topic: &str, size: i32) {
     for id in 1..(size + 1) {
         ctx.storage
             .store
-            .upsert_message(TEST_TOPIC, &id.to_string())
+            .upsert_message(topic, &id.to_string())
             .await
             .unwrap();
-        thread::sleep(time::Duration::from_millis(2));
+        std::thread::sleep(time::Duration::from_millis(2));
     }
 }
