@@ -1,8 +1,10 @@
+extern crate core;
+
 // mod env;
 // mod providers;
-// mod store; // Comment this out for now
 mod context;
 mod functional;
+mod store;
 
 pub type ErrorResult<T> = Result<T, TestError>;
 
@@ -12,5 +14,5 @@ pub enum TestError {
     Elapsed(#[from] tokio::time::error::Elapsed),
 
     #[error(transparent)]
-    RustHttpStarter(#[from] gilgamesh::error::Error),
+    Gilgamesh(#[from] gilgamesh::error::Error),
 }

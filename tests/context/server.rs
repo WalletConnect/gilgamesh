@@ -11,16 +11,16 @@ use {
     },
 };
 
-pub struct RustHttpStarter {
+pub struct Gilgamesh {
     pub public_addr: SocketAddr,
-    shutdown_signal: tokio::sync::broadcast::Sender<()>,
+    shutdown_signal: broadcast::Sender<()>,
     is_shutdown: bool,
 }
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {}
 
-impl RustHttpStarter {
+impl Gilgamesh {
     pub async fn start() -> Self {
         let public_port = get_random_port();
         let rt = Handle::current();
@@ -49,7 +49,7 @@ impl RustHttpStarter {
         });
 
         if let Err(e) = wait_for_server_to_start(public_port).await {
-            panic!("Failed to start server with error: {:?}", e)
+            panic!("Failed to start server with error: {e:?}")
         }
 
         Self {

@@ -1,0 +1,6 @@
+*
+!src
+!build.rs
+!Cargo.*
+!.git
+!bin

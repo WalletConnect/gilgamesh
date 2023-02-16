@@ -1,21 +1,19 @@
-use {
-    crate::stores::messages::{MessagesPersistentStorageArc, MongoPersistentStorage},
-    axum::routing::post,
-};
-
 pub mod config;
 pub mod error;
 mod handlers;
 mod state;
-mod stores;
+pub mod stores;
 
 use {
     crate::{
         config::Configuration,
         state::{AppState, Metrics},
+        stores::messages::{MessagesPersistentStorageArc, MongoPersistentStorage},
     },
-    axum::{routing::get, Router},
-    log::LevelFilter,
+    axum::{
+        routing::{get, post},
+        Router,
+    },
     opentelemetry::{
         sdk::{
             metrics::selectors,
@@ -26,7 +24,7 @@ use {
         KeyValue,
     },
     opentelemetry_otlp::{Protocol, WithExportConfig},
-    std::{net::SocketAddr, str::FromStr, sync::Arc, time::Duration},
+    std::{net::SocketAddr, sync::Arc, time::Duration},
     tokio::{select, sync::broadcast},
     tower::ServiceBuilder,
     tracing::info,

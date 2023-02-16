@@ -1,4 +1,5 @@
 version: '3.9'
+
 services:
   jaeger:
     image: jaegertracing/opentelemetry-all-in-one:latest
@@ -43,32 +44,6 @@ services:
       - ME_CONFIG_MONGODB_ADMINPASSWORD=admin
       - ME_CONFIG_MONGODB_URL="mongodb://admin:admin@mongo:27017"
       
-  gilgamesh:
-    networks:
-      - gilgamesh
-    build:
-      dockerfile: ./Dockerfile-dev
-      context: .
-    depends_on:
-      jaeger:
-        condition: service_started
-    ports:
-      - "3000:3000"
-    environment:
-      - PORT=3000
-      - LOG_LEVEL=INFO
-      - TELEMETRY_ENABLED=true
-      - MONGO_ADDR=mongodb://admin:admin@mongo:27017/gilgamesh?authSource=admin
-      - TELEMETRY_GRPC_URL=http://jaeger:4317
-      - ATTESTATION_CACHE_URL=redis://redis:6379/0
-    volumes:
-      - ./:/gilgamesh/
-    healthcheck:
-      test: [ "CMD", "curl", "localhost:3000/health" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
 networks:
   gilgamesh:
     ipam:

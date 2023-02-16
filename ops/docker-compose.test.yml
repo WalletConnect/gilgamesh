@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  gilgamesh-test:
+    build:
+      dockerfile: ./ops/Dockerfile-dev
+      context: ../
+    volumes:
+      - ../:/gilgamesh/
+    networks:
+      - gilgamesh
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      - RUST_BACKTRACE=1
+      - PORT=3000
+      - LOG_LEVEL=INFO
+      - TELEMETRY_ENABLED=true
+      - TELEMETRY_GRPC_URL=http://jaeger:4317
+      - MONGO_ADDRESS=mongodb://admin:admin@mongo:27017/gilgamesh?authSource=admin
+    command: [ "cargo", "test", "--all-features" ]

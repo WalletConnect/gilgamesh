@@ -49,7 +49,7 @@ impl IntoResponse for Error {
                     StatusCode::NOT_FOUND,
                     ResponseError {
                         name: format!("{} not found", &entity),
-                        message: format!("Cannot find {} with specified identifier {}", entity, id),
+                        message: format!("Cannot find {entity} with specified identifier {id}"),
                     },
                 ),
             },
