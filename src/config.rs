@@ -1,40 +1,75 @@
-use {serde::Deserialize, std::str::FromStr};
+use {super::error, serde::Deserialize};
 
+const DEFAULT_PORT_NUMBER: u16 = 3001;
+const DEFAULT_LOG_LEVEL: &str = "WARN";
+const DEFAULT_RELAY_URL: &str = "https://relay.walletconnect.com";
+const DEFAULT_VALIDATE_SIGNATURES: bool = true;
+const DEFAULT_CORS_ALLOWED_ORIGINS: &[&str] = &["*"];
+
+/// The server configuration.
 #[derive(Deserialize, Debug, Clone, Eq, PartialEq)]
 pub struct Configuration {
+    /// The port number of the HTTP server.
     #[serde(default = "default_port")]
     pub port: u16,
+    pub public_url: String,
     #[serde(default = "default_log_level")]
     pub log_level: String,
-    #[serde(default = "default_is_test", skip)]
-    /// This is an internal flag to disable logging, cannot be defined by user
-    pub is_test: bool,
+    /// The URL of the Relay server.
+    #[serde(default = "default_relay_url")]
+    pub relay_url: String,
+    /// A flag to enable or disable the signature validation.
+    #[serde(default = "default_validate_signatures")]
+    pub validate_signatures: bool,
+    /// The address of the MongoDB instance.
     pub mongo_address: String,
+    /// An internal flag to disable logging, cannot be defined by user.
+    #[serde(default = "default_is_test", skip)]
+    pub is_test: bool,
+    // CORS
+    #[serde(default = "default_cors_allowed_origins")]
+    pub cors_allowed_origins: Vec<String>,
 
-    // TELEMETRY
-    pub telemetry_enabled: Option<bool>,
-    pub telemetry_grpc_url: Option<String>,
+    pub otel_exporter_otlp_endpoint: Option<String>,
+    pub telemetry_prometheus_port: Option<u16>,
 }
 
 impl Configuration {
-    pub fn new() -> crate::Result<Configuration> {
-        let config = envy::from_env::<Configuration>()?;
-        Ok(config)
-    }
-
-    pub fn log_level(&self) -> tracing::Level {
-        tracing::Level::from_str(self.log_level.as_str()).expect("Invalid log level")
+    /// Validate the configuration.
+    pub fn is_valid(&self) -> error::Result<()> {
+        Ok(())
     }
 }
 
 fn default_port() -> u16 {
-    3001
+    DEFAULT_PORT_NUMBER
 }
 
 fn default_log_level() -> String {
-    "WARN".to_string()
+    DEFAULT_LOG_LEVEL.to_string()
+}
+
+fn default_relay_url() -> String {
+    DEFAULT_RELAY_URL.to_string()
+}
+
+fn default_validate_signatures() -> bool {
+    DEFAULT_VALIDATE_SIGNATURES
 }
 
 fn default_is_test() -> bool {
     false
+}
+
+fn default_cors_allowed_origins() -> Vec<String> {
+    DEFAULT_CORS_ALLOWED_ORIGINS
+        .iter()
+        .map(|s| s.to_string())
+        .collect::<Vec<String>>()
+}
+
+/// Create a new configuration from the environment variables.
+pub fn get_config() -> error::Result<Configuration> {
+    let config = envy::from_env::<Configuration>()?;
+    Ok(config)
 }

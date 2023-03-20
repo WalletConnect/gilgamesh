@@ -30,20 +30,26 @@ impl Gilgamesh {
 
         std::thread::spawn(move || {
             rt.block_on(async move {
+                let public_port = get_random_port();
                 let mongo_address = match env::var("MONGO_ADDRESS") {
                     Ok(val) => val,
                     Err(_) => "mongodb://admin:admin@mongo:27017/gilgamesh?authSource=admin".into(),
                 };
+
                 let config: Configuration = Configuration {
                     port: public_port,
-                    log_level: "INFO".into(),
-                    telemetry_enabled: None,
-                    telemetry_grpc_url: None,
-                    is_test: true,
+                    public_url: format!("http://127.0.0.1:{public_port}"),
+                    log_level: "info,history-server=info".into(),
+                    relay_url: "https://relay.walletconnect.com".into(),
+                    validate_signatures: false,
                     mongo_address,
+                    is_test: true,
+                    cors_allowed_origins: vec!["*".to_string()],
+                    otel_exporter_otlp_endpoint: None,
+                    telemetry_prometheus_port: Some(get_random_port()),
                 };
 
-                gilgamesh::bootstap(shutdown, config).await
+                gilgamesh::bootstrap(shutdown, config).await
             })
             .unwrap();
         });
@@ -72,7 +78,7 @@ impl Gilgamesh {
 }
 
 // Finds a free port.
-fn get_random_port() -> u16 {
+pub fn get_random_port() -> u16 {
     use std::sync::atomic::{AtomicU16, Ordering};
 
     static NEXT_PORT: AtomicU16 = AtomicU16::new(9000);

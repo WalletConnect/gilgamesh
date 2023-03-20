@@ -1,7 +1,7 @@
 use {
     crate::context::StoreContext,
     core::time,
-    gilgamesh::stores::messages::MessagesPersistentStorage,
+    gilgamesh::store::messages::MessagesStore,
     test_context::test_context,
 };
 
