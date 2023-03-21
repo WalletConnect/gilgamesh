@@ -1,7 +1,7 @@
 use {
     crate::{
         handlers::{ErrorField, ErrorLocation, ResponseError},
-        middleware::validate_signature::{SIGNATURE_HEADER_NAME, TIMESTAMP_HEADER_NAME},
+        relay::signature::{SIGNATURE_HEADER_NAME, TIMESTAMP_HEADER_NAME},
         store::StoreError,
     },
     axum::response::{IntoResponse, Response},

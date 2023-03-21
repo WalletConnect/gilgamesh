@@ -4,6 +4,8 @@ use {
     std::ops::Add,
 };
 
+pub mod signature;
+
 const PUBLIC_KEY_TTL_HOURS: i64 = 6;
 
 #[derive(Clone)]

@@ -5,6 +5,7 @@ use {
 };
 
 pub mod get_messages;
+pub mod get_registration;
 pub mod health;
 pub mod metrics;
 pub mod register;

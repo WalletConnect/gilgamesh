@@ -6,9 +6,9 @@ use {
     },
     config::Configuration,
     opentelemetry::{sdk::Resource, KeyValue},
-    state::{AppState, MessagesStorageArc},
+    state::AppState,
     std::{net::SocketAddr, sync::Arc},
-    store::messages::MongoStore,
+    store::mongo::MongoStore,
     tokio::{select, sync::broadcast},
     tower::ServiceBuilder,
     tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
@@ -22,7 +22,6 @@ pub mod handlers;
 pub mod log;
 pub mod macros;
 pub mod metrics;
-pub mod middleware;
 pub mod relay;
 pub mod state;
 pub mod store;
@@ -35,8 +34,8 @@ pub async fn bootstrap(
     // Check config is valid and then throw the error if its not
     config.is_valid()?;
 
-    let store: MessagesStorageArc = Arc::new(MongoStore::new(&config).await?);
-    let mut state = AppState::new(config.clone(), store)?;
+    let store = Arc::new(MongoStore::new(&config).await?);
+    let mut state = AppState::new(config.clone(), store.clone(), store.clone())?;
 
     // Fetch public key so it's cached for the first 6hrs
     let public_key = state.relay_client.public_key().await;
@@ -76,6 +75,7 @@ pub async fn bootstrap(
         .route("/health", get(handlers::health::handler))
         .route("/messages", get(handlers::get_messages::handler))
         .route("/messages", post(handlers::save_message::handler))
+        .route("/register", get(handlers::get_registration::handler))
         .route("/register", post(handlers::register::handler))
         .layer(global_middleware)
         .with_state(state_arc.clone());

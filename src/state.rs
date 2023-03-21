@@ -3,7 +3,7 @@ use {
         error,
         metrics::Metrics,
         relay::RelayClient,
-        store::messages::MessagesStore,
+        store::{messages::MessagesStore, registrations::RegistrationStore},
         Configuration,
     },
     build_info::BuildInfo,
@@ -11,6 +11,7 @@ use {
 };
 
 pub type MessagesStorageArc = Arc<dyn MessagesStore + Send + Sync + 'static>;
+pub type RegistrationStorageArc = Arc<dyn RegistrationStore + Send + Sync + 'static>;
 
 pub trait State {
     fn config(&self) -> Configuration;
@@ -26,6 +27,7 @@ pub struct AppState {
     pub build_info: BuildInfo,
     pub metrics: Option<Metrics>,
     pub messages_store: MessagesStorageArc,
+    pub registration_store: RegistrationStorageArc,
     pub relay_client: RelayClient,
     pub auth_aud: HashSet<String>,
 }
@@ -36,6 +38,7 @@ impl AppState {
     pub fn new(
         config: Configuration,
         messages_store: MessagesStorageArc,
+        registration_store: RegistrationStorageArc,
     ) -> error::Result<AppState> {
         let build_info: &BuildInfo = build_info();
 
@@ -46,6 +49,7 @@ impl AppState {
             build_info: build_info.clone(),
             metrics: None,
             messages_store,
+            registration_store,
             relay_client: RelayClient::new(relay_url),
             auth_aud: [
                 "wss://relay.walletconnect.com".to_owned(),

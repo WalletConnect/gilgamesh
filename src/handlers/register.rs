@@ -6,9 +6,9 @@ use {
         increment_counter,
         log::prelude::*,
         state::AppState,
-        store::messages::{Deserialize, Serialize},
     },
     axum::{extract::State, Json},
+    serde::{Deserialize, Serialize},
     std::sync::Arc,
 };
 
@@ -24,11 +24,18 @@ pub async fn handler(
     AuthBearer(token): AuthBearer,
     Json(body): Json<RegisterPayload>,
 ) -> error::Result<Response> {
-    let _client_id = jwt::Jwt(token).decode(&state.auth_aud.clone())?;
+    let client_id = jwt::Jwt(token).decode(&state.auth_aud.clone())?;
+
+    state
+        .registration_store
+        .upsert_registration(
+            client_id.value(),
+            body.tags.iter().map(AsRef::as_ref).collect(),
+            body.relay_url.as_str(),
+        )
+        .await?;
 
     increment_counter!(state.metrics, register);
-
-    info!("Register payload: {:?}", body);
 
     Ok(Response::default())
 }

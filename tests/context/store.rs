@@ -1,6 +1,6 @@
 use {
     crate::context::server::get_random_port,
-    gilgamesh::{config::Configuration, store::messages::MongoStore},
+    gilgamesh::{config::Configuration, store::mongo::MongoStore},
     std::env,
 };
 
