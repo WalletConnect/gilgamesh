@@ -108,7 +108,13 @@ impl MongoStore {
 
 #[async_trait]
 impl MessagesStore for MongoStore {
-    async fn upsert_message(&self, topic: &str, message_id: &str) -> Result<(), StoreError> {
+    async fn upsert_message(
+        &self,
+        client_id: &str,
+        message_id: &str,
+        topic: &str,
+        message: &str,
+    ) -> Result<(), StoreError> {
         let filter = doc! {
             "message_id": &message_id,
         };
@@ -116,8 +122,10 @@ impl MessagesStore for MongoStore {
         let update = doc! {
             "$set": {
                 "ts": Utc::now(),
+                "client_id": &client_id,
                 "topic": &topic,
                 "message_id": &message_id,
+                "message": &message,
             }
         };
 
@@ -164,7 +172,6 @@ impl RegistrationStore for MongoStore {
 
         let update = doc! {
             "$set": {
-                "ts": Utc::now(),
                 "client_id": &client_id,
                 "tags": tags,
                 "relay_url": &relay_url,

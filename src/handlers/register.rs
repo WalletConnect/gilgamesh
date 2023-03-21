@@ -5,7 +5,7 @@ use {
         handlers::Response,
         increment_counter,
         log::prelude::*,
-        state::AppState,
+        state::{AppState, CachedRegistration},
     },
     axum::{extract::State, Json},
     serde::{Deserialize, Serialize},
@@ -34,6 +34,14 @@ pub async fn handler(
             body.relay_url.as_str(),
         )
         .await?;
+
+    state
+        .registration_cache
+        .insert(client_id.value().to_string(), CachedRegistration {
+            tags: body.tags.clone(),
+            relay_url: body.relay_url.clone(),
+        })
+        .await;
 
     increment_counter!(state.metrics, register);
 

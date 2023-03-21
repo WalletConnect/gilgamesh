@@ -24,6 +24,9 @@ pub struct Metrics {
     pub served_items: Counter<u64>,
 
     pub register: Counter<u64>,
+    pub cached_registrations: Counter<u64>,
+    pub fetched_registrations: Counter<u64>,
+    pub registration_cache_invalidation: Counter<u64>,
 }
 
 impl Metrics {
@@ -71,6 +74,21 @@ impl Metrics {
             .with_description("The number of calls to the register method")
             .init();
 
+        let cached_registrations = meter
+            .u64_counter("cached_registrations")
+            .with_description("The number of registrations retrieved from the in-memory cache")
+            .init();
+
+        let fetched_registrations = meter
+            .u64_counter("fetched_registrations")
+            .with_description("The number of registrations retrieved from the database")
+            .init();
+
+        let registration_cache_invalidation = meter
+            .u64_counter("registration_cache_invalidation")
+            .with_description("The number of registrations cache invalidations")
+            .init();
+
         Ok(Metrics {
             prometheus_exporter,
             received_items,
@@ -78,6 +96,9 @@ impl Metrics {
             get_queries,
             served_items,
             register,
+            cached_registrations,
+            fetched_registrations,
+            registration_cache_invalidation,
         })
     }
 

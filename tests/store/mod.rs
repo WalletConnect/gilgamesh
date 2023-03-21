@@ -5,13 +5,14 @@ use {
     test_context::test_context,
 };
 
-const TEST_TOPIC: &str = "123456789";
+const TEST_CLIENT: &str = "12345";
+const TEST_TOPIC: &str = "67890";
 const TEST_QUERY_SIZE: usize = 3;
 
 #[test_context(StoreContext)]
 #[tokio::test]
 async fn test_get_messages(ctx: &mut StoreContext) {
-    fill_store(ctx, TEST_TOPIC, 20).await;
+    fill_store(ctx, TEST_CLIENT, TEST_TOPIC, 20).await;
     futures::join!(
         test_after_no_origin(ctx),
         test_after_origin(ctx),
@@ -192,11 +193,11 @@ async fn test_before_origin_overflow(ctx: &StoreContext) {
     assert_eq!(result.next_id, None, "Check next_id");
 }
 
-async fn fill_store(ctx: &StoreContext, topic: &str, size: i32) {
+async fn fill_store(ctx: &StoreContext, client_id: &str, topic: &str, size: i32) {
     for id in 1..(size + 1) {
         ctx.storage
             .store
-            .upsert_message(topic, &id.to_string())
+            .upsert_message(client_id, topic, &id.to_string(), id.to_string().as_str())
             .await
             .unwrap();
         std::thread::sleep(time::Duration::from_millis(2));

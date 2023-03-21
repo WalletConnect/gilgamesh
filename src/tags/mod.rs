@@ -21,24 +21,6 @@ pub fn match_tag(tag: u32, pattern: &str) -> bool {
     }
 }
 
-pub fn get_pattern_weight(patter: &str) -> usize {
-    let mut pattern_chars = patter.chars();
-
-    let mut weight = 0;
-    loop {
-        match pattern_chars.next() {
-            Some(c) => {
-                if c == TAG_WILDCARD {
-                    weight += 1;
-                } else {
-                    weight += 10;
-                }
-            }
-            None => return weight,
-        }
-    }
-}
-
 #[cfg(test)]
 mod test_match_tag {
     use super::*;
@@ -77,21 +59,5 @@ mod test_match_tag {
     fn test_longer_tag() {
         assert!(!match_tag(1234, "12*"));
         assert!(!match_tag(1234, "*23"));
-    }
-}
-
-#[cfg(test)]
-mod test_get_pattern_weight {
-    use super::*;
-
-    #[test]
-    fn test_get_pattern_weight() {
-        assert_eq!(get_pattern_weight("1234"), 40);
-        assert_eq!(get_pattern_weight("****"), 4);
-        assert_eq!(get_pattern_weight("1*34"), 31);
-        assert_eq!(get_pattern_weight("12*4"), 31);
-        assert_eq!(get_pattern_weight("1**4"), 22);
-        assert_eq!(get_pattern_weight("12"), 20);
-        assert_eq!(get_pattern_weight("**"), 2);
     }
 }

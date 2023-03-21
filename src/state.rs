@@ -7,11 +7,18 @@ use {
         Configuration,
     },
     build_info::BuildInfo,
-    std::{collections::HashSet, sync::Arc},
+    moka::future::Cache,
+    std::{collections::HashSet, sync::Arc, time::Duration},
 };
 
 pub type MessagesStorageArc = Arc<dyn MessagesStore + Send + Sync + 'static>;
 pub type RegistrationStorageArc = Arc<dyn RegistrationStore + Send + Sync + 'static>;
+
+#[derive(Clone)]
+pub struct CachedRegistration {
+    pub tags: Vec<String>,
+    pub relay_url: String,
+}
 
 pub trait State {
     fn config(&self) -> Configuration;
@@ -28,6 +35,7 @@ pub struct AppState {
     pub metrics: Option<Metrics>,
     pub messages_store: MessagesStorageArc,
     pub registration_store: RegistrationStorageArc,
+    pub registration_cache: Cache<String, CachedRegistration>,
     pub relay_client: RelayClient,
     pub auth_aud: HashSet<String>,
 }
@@ -44,12 +52,26 @@ impl AppState {
 
         let relay_url = config.relay_url.to_string();
 
+        let registration_cache = Cache::builder()
+            .weigher(|_key, value: &CachedRegistration| -> u32 {
+                value.relay_url.len().try_into().unwrap_or(u32::MAX)
+                    + value
+                        .tags
+                        .iter()
+                        .fold(0, |acc, tag| acc + (tag.len() as u32))
+            })
+            .max_capacity(32 * 1024 * 1024)
+            .time_to_live(Duration::from_secs(30 * 60))
+            .time_to_idle(Duration::from_secs(5 * 60))
+            .build();
+
         Ok(AppState {
             config,
             build_info: build_info.clone(),
             metrics: None,
             messages_store,
             registration_store,
+            registration_cache,
             relay_client: RelayClient::new(relay_url),
             auth_aud: [
                 "wss://relay.walletconnect.com".to_owned(),

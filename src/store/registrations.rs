@@ -3,12 +3,12 @@ use {
     async_trait::async_trait,
     serde::{Deserialize, Serialize},
     wither::{
-        bson::{self, doc, oid::ObjectId},
+        bson::{doc, oid::ObjectId},
         Model,
     },
 };
 
-#[derive(Debug, Model, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Model, Serialize, Deserialize, PartialEq, Eq)]
 #[model(
     collection_name = "Registrations",
     index(keys = r#"doc!{"ts": 1}"#),
@@ -18,9 +18,6 @@ pub struct Registration {
     /// MongoDB's default `_id` field.
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
-    /// The timestamp of the registration.
-    #[serde(rename = "ts")]
-    pub timestamp: bson::DateTime,
     /// The 'client_id' of the registration.
     pub client_id: String,
     /// The registered tags
