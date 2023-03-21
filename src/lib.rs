@@ -15,6 +15,7 @@ use {
     tracing::Level,
 };
 
+pub mod auth;
 pub mod config;
 pub mod error;
 pub mod handlers;
@@ -25,6 +26,7 @@ pub mod middleware;
 pub mod relay;
 pub mod state;
 pub mod store;
+pub mod tags;
 
 pub async fn bootstrap(
     mut shutdown: broadcast::Receiver<()>,
@@ -74,6 +76,7 @@ pub async fn bootstrap(
         .route("/health", get(handlers::health::handler))
         .route("/messages", get(handlers::get_messages::handler))
         .route("/messages", post(handlers::save_message::handler))
+        .route("/register", post(handlers::register::handler))
         .layer(global_middleware)
         .with_state(state_arc.clone());
 

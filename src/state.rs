@@ -7,7 +7,7 @@ use {
         Configuration,
     },
     build_info::BuildInfo,
-    std::sync::Arc,
+    std::{collections::HashSet, sync::Arc},
 };
 
 pub type MessagesStorageArc = Arc<dyn MessagesStore + Send + Sync + 'static>;
@@ -27,6 +27,7 @@ pub struct AppState {
     pub metrics: Option<Metrics>,
     pub messages_store: MessagesStorageArc,
     pub relay_client: RelayClient,
+    pub auth_aud: HashSet<String>,
 }
 
 build_info::build_info!(fn build_info);
@@ -46,6 +47,11 @@ impl AppState {
             metrics: None,
             messages_store,
             relay_client: RelayClient::new(relay_url),
+            auth_aud: [
+                "wss://relay.walletconnect.com".to_owned(),
+                "https://history.walletconnect.com".to_owned(),
+            ]
+            .into(),
         })
     }
 

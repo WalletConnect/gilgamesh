@@ -204,6 +204,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "bs58"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "771fe0050b883fcc3ea2359b1a96bcfbc090b7116eae7c3c512c7a083fdf23d3"
+
+[[package]]
 name = "bson"
 version = "2.6.0"
 source = "git+https://github.com/mongodb/bson-rust?branch=main#3cc6dd32993a26f13c4129ea343282ab3908fda7"
@@ -676,6 +682,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ed25519-dalek"
+version = "1.0.1"
+source = "git+https://github.com/dalek-cryptography/ed25519-dalek.git?rev=7529d65#7529d65506147b6cb24ca6d8f4fc062cac33b395"
+dependencies = [
+ "curve25519-dalek",
+ "ed25519",
+ "rand 0.7.3",
+ "serde",
+ "sha2 0.9.9",
+ "zeroize",
+]
+
+[[package]]
 name = "either"
 version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -915,17 +934,20 @@ dependencies = [
  "build-info",
  "build-info-build",
  "chrono",
+ "data-encoding",
  "dotenv",
- "ed25519-dalek",
+ "ed25519-dalek 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "envy",
  "futures",
  "hex",
  "hyper",
+ "jsonwebtoken",
  "log",
  "opentelemetry",
  "opentelemetry-otlp",
  "opentelemetry-prometheus",
  "prometheus",
+ "relay_rpc",
  "reqwest",
  "serde",
  "serde_json",
@@ -1261,6 +1283,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "445dde2150c55e483f3d8416706b97ec8e8237c307e5b7b4b8dd15e6af2a0730"
 dependencies = [
  "wasm-bindgen",
+]
+
+[[package]]
+name = "jsonwebtoken"
+version = "8.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6971da4d9c3aa03c3d8f3ff0f4155b534aad021292003895a469716b2a230378"
+dependencies = [
+ "base64 0.21.0",
+ "pem",
+ "ring",
+ "serde",
+ "serde_json",
+ "simple_asn1",
 ]
 
 [[package]]
@@ -1734,6 +1770,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "pem"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a8835c273a76a90455d7344889b0964598e3316e2a79ede8e36f16bdcf2228b8"
+dependencies = [
+ "base64 0.13.1",
+]
+
+[[package]]
 name = "percent-encoding"
 version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2051,6 +2096,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "456c603be3e8d448b072f410900c09faf164fbce2d480456f50eea6e25f9c848"
 
 [[package]]
+name = "relay_rpc"
+version = "0.1.0"
+source = "git+https://github.com/WalletConnect/WalletConnectRust.git?rev=7f08502440842308cde74bb7f4cddc4bbd7d6fbc#7f08502440842308cde74bb7f4cddc4bbd7d6fbc"
+dependencies = [
+ "bs58",
+ "chrono",
+ "data-encoding",
+ "derive_more",
+ "ed25519-dalek 1.0.1 (git+https://github.com/dalek-cryptography/ed25519-dalek.git?rev=7529d65)",
+ "jsonwebtoken",
+ "once_cell",
+ "rand 0.7.3",
+ "regex",
+ "serde",
+ "serde-aux",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "reqwest"
 version = "0.11.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2275,6 +2340,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde-aux"
+version = "4.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c599b3fd89a75e0c18d6d2be693ddb12cccaf771db4ff9e39097104808a014c0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "serde_bytes"
 version = "0.11.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2407,6 +2482,18 @@ name = "signature"
 version = "1.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "74233d3b3b2f6d4b006dc19dee745e73e2a6bfb6f93607cd3b02bd5b00797d7c"
+
+[[package]]
+name = "simple_asn1"
+version = "0.6.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "adc4e5204eb1910f40f9cfa375f6f05b68c3abac4b6fd879c8ff5e7ae8a0a085"
+dependencies = [
+ "num-bigint",
+ "num-traits",
+ "thiserror",
+ "time 0.3.20",
+]
 
 [[package]]
 name = "slab"

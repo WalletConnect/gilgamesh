@@ -15,6 +15,9 @@ tower = "0.4"
 tower-http = { version = "0.4.0", features = ["trace", "cors"] }
 hyper = "0.14"
 
+# WalletConnect
+relay_rpc = { git = "https://github.com/WalletConnect/WalletConnectRust.git", rev = "7f08502440842308cde74bb7f4cddc4bbd7d6fbc" }
+
 # Database
 wither = { git = "https://github.com/WalletConnect/wither.git", rev = "6a70e74", features = ["bson-chrono-0_4"] }
 wither_derive = { git = "https://github.com/WalletConnect/wither.git", rev = "6a70e74" }
@@ -43,12 +46,15 @@ atty = "0.2"
 # Signature validation
 ed25519-dalek = "1.0"
 
+# JWT
+jsonwebtoken = "8.1"
 
 # Misc
 anyhow = "1"
 async-trait = "0.1"
 build-info = "0.0"
 chrono = { version = "0.4", features = ["serde"] }
+data-encoding = "2.3"
 futures = "0.3.25"
 hex = "0.4"
 log = "0.4"

@@ -22,6 +22,8 @@ pub struct Metrics {
 
     pub get_queries: Counter<u64>,
     pub served_items: Counter<u64>,
+
+    pub register: Counter<u64>,
 }
 
 impl Metrics {
@@ -64,12 +66,18 @@ impl Metrics {
             .with_description("The number of stored items served")
             .init();
 
+        let register = meter
+            .u64_counter("register")
+            .with_description("The number of calls to the register method")
+            .init();
+
         Ok(Metrics {
             prometheus_exporter,
             received_items,
             stored_items,
             get_queries,
             served_items,
+            register,
         })
     }
 

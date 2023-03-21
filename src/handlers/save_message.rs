@@ -14,6 +14,7 @@ use {
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct HistoryPayload {
+    pub client_id: String,
     pub topic: String,
     pub message_id: String,
     pub tag: u32,

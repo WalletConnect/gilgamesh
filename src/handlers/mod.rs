@@ -7,6 +7,7 @@ use {
 pub mod get_messages;
 pub mod health;
 pub mod metrics;
+pub mod register;
 pub mod save_message;
 
 #[derive(serde::Serialize)]

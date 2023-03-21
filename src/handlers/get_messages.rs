@@ -1,5 +1,6 @@
 use {
     crate::{
+        auth::{jwt, AuthBearer},
         error,
         increment_counter,
         increment_counter_with,
@@ -71,8 +72,11 @@ pub struct GetMessagesResponse {
 /// The handler for the get messages endpoint.
 pub async fn handler(
     State(state): State<Arc<AppState>>,
+    AuthBearer(token): AuthBearer,
     query: Query<GetMessagesBody>,
 ) -> Result<Json<GetMessagesResponse>, error::Error> {
+    let _client_id = jwt::Jwt(token).decode(&state.auth_aud.clone())?;
+
     let direction = query.direction.unwrap_or(Direction::Forward);
     let topic = query.topic.clone();
 

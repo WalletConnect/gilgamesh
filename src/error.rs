@@ -78,19 +78,18 @@ pub enum Error {
     #[error(transparent)]
     FromUtf8Error(#[from] std::string::FromUtf8Error),
 
-    // #[error(transparent)]
-    // MultipartError(#[from] axum::extract::multipart::MultipartError),
-    //
-    // #[error("The provided multi-part body did not satisfy the requirements")]
-    // InvalidMultipartBody,
     #[error("History item received without a topic, please ensure all required  parameters set")]
     MissingTopic,
 
     #[error("this should not have occurred; used when case has been handled before")]
     InternalServerError,
 
-    // #[error(transparent)]
-    // JwtError(#[from] crate::authentication::JwtVerificationError),
+    #[error(transparent)]
+    JwtError(#[from] relay_rpc::auth::JwtVerificationError),
+
+    #[error(transparent)]
+    AuthError(#[from] relay_rpc::auth::Error),
+
     #[error("the provided authentication does not authenticate the request")]
     InvalidAuthentication,
 }
