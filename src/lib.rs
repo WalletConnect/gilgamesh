@@ -40,7 +40,7 @@ pub async fn bootstrap(
     // Fetch public key so it's cached for the first 6hrs
     let public_key = state.relay_client.public_key().await;
     if public_key.is_err() {
-        warn!("Failed initial fetch of Relay's Public Key, this may prevent webhook validation.")
+        warn!("Failed initial fetch of Relay's Public Key, this may prevent items validation.")
     }
 
     if state.config.telemetry_prometheus_port.is_some() {

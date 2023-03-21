@@ -142,8 +142,8 @@ impl IntoResponse for Error {
             },
             Error::MissingAllSignatureHeader => crate::handlers::Response::new_failure(StatusCode::UNAUTHORIZED, vec![
                 ResponseError {
-                    name: "webhook_validation_failed".to_string(),
-                    message: "Failed to validate webhook, please ensure that all required headers are provided.".to_string(),
+                    name: "history_item_validation_failed".to_string(),
+                    message: "Failed to validate history item, please ensure that all required headers are provided.".to_string(),
                 }
             ], vec![
                 ErrorField {
@@ -159,8 +159,8 @@ impl IntoResponse for Error {
             ]),
             Error::MissingSignatureHeader => crate::handlers::Response::new_failure(StatusCode::UNAUTHORIZED, vec![
                 ResponseError {
-                    name: "webhook_validation_failed".to_string(),
-                    message: "Failed to validate webhook, please ensure that all required headers are provided.".to_string(),
+                    name: "history_item_validation_failed".to_string(),
+                    message: "Failed to validate history item, please ensure that all required headers are provided.".to_string(),
                 }
             ], vec![
                 ErrorField {
@@ -171,8 +171,8 @@ impl IntoResponse for Error {
             ]),
             Error::MissingTimestampHeader => crate::handlers::Response::new_failure(StatusCode::UNAUTHORIZED, vec![
                 ResponseError {
-                    name: "webhook_validation_failed".to_string(),
-                    message: "Failed to validate webhook, please ensure that all required headers are provided.".to_string(),
+                    name: "history_item_validation_failed".to_string(),
+                    message: "Failed to validate history item, please ensure that all required headers are provided.".to_string(),
                 }
             ], vec![
                 ErrorField {
