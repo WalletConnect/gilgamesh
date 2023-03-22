@@ -65,6 +65,7 @@ thiserror = "1.0"
 
 [dev-dependencies]
 test-context = "0.1"
+function_name = "0.3.0"
 
 [build-dependencies]
 build-info-build = "0.0"

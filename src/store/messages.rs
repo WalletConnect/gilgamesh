@@ -13,9 +13,11 @@ use {
     collection_name = "Messages",
     index(keys = r#"doc!{"ts": 1}"#),
     index(keys = r#"doc!{"ts": -1}"#),
-    index(keys = r#"doc!{"client_id": 1}"#),
-    index(keys = r#"doc!{"topic": 1}"#),
-    index(keys = r#"doc!{"message_id": 1}"#, options = r#"doc!{"unique": true}"#)
+    index(keys = r#"doc!{"client_id": 1, "topic": 1}"#),
+    index(
+        keys = r#"doc!{"client_id": 1, "topic": 1, "message_id": 1}"#,
+        options = r#"doc!{"unique": true}"#
+    )
 )]
 pub struct Message {
     /// MongoDB's default `_id` field.
@@ -51,12 +53,14 @@ pub trait MessagesStore: 'static + std::fmt::Debug + Send + Sync {
     ) -> Result<(), StoreError>;
     async fn get_messages_after(
         &self,
+        client_id: &str,
         topic: &str,
         origin: Option<&str>,
         message_count: usize,
     ) -> Result<StoreMessages, StoreError>;
     async fn get_messages_before(
         &self,
+        client_id: &str,
         topic: &str,
         origin: Option<&str>,
         message_count: usize,

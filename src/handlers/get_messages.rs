@@ -75,7 +75,7 @@ pub async fn handler(
     AuthBearer(token): AuthBearer,
     query: Query<GetMessagesBody>,
 ) -> Result<Json<GetMessagesResponse>, error::Error> {
-    let _client_id = jwt::Jwt(token).decode(&state.auth_aud.clone())?;
+    let client_id = jwt::Jwt(token).decode(&state.auth_aud.clone())?;
 
     let direction = query.direction.unwrap_or(Direction::Forward);
     let topic = query.topic.clone();
@@ -85,6 +85,7 @@ pub async fn handler(
             state
                 .messages_store
                 .get_messages_after(
+                    client_id.value(),
                     topic.as_str(),
                     origin_id.as_deref(),
                     query.message_count.limit(),
@@ -95,6 +96,7 @@ pub async fn handler(
             state
                 .messages_store
                 .get_messages_before(
+                    client_id.value(),
                     query.topic.as_str(),
                     origin_id.as_deref(),
                     query.message_count.limit(),
