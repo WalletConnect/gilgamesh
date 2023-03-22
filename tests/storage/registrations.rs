@@ -13,6 +13,7 @@ const TEST_RELAY_URL: &str = "https:://test.relay.walletconnect.com";
 // NOTE: Requires the dev MongoDB container (see `ops/docker-compose.yml`).
 #[test_context(StoreContext)]
 #[tokio::test]
+#[cfg_attr(not(feature = "storage-tests"), ignore)]
 async fn test_registration(ctx: &StoreContext) {
     const TAGS: [&str; 2] = ["1234", "5678"];
     ctx.storage
@@ -35,6 +36,7 @@ async fn test_registration(ctx: &StoreContext) {
 // NOTE: Requires the dev MongoDB container (see `ops/docker-compose.yml`).
 #[test_context(StoreContext)]
 #[tokio::test]
+#[cfg_attr(not(feature = "storage-tests"), ignore)]
 async fn test_registration_not_found(ctx: &StoreContext) {
     let client_id = format!("{TEST_CLIENT_ID}-not-found");
 

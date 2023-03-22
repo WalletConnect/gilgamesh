@@ -13,6 +13,7 @@ const TEST_QUERY_SIZE: usize = 3;
 #[named]
 #[test_context(StoreContext)]
 #[tokio::test]
+#[cfg_attr(not(feature = "storage-tests"), ignore)]
 async fn test_after_no_origin(ctx: &StoreContext) {
     let topic = function_name!();
     fill_store(ctx, TEST_CLIENT_ID, topic, 20).await;
@@ -47,6 +48,7 @@ async fn test_after_no_origin(ctx: &StoreContext) {
 #[named]
 #[test_context(StoreContext)]
 #[tokio::test]
+#[cfg_attr(not(feature = "storage-tests"), ignore)]
 async fn test_after_origin(ctx: &StoreContext) {
     let topic = function_name!();
     fill_store(ctx, TEST_CLIENT_ID, topic, 20).await;
@@ -92,6 +94,7 @@ async fn test_after_origin(ctx: &StoreContext) {
 #[named]
 #[test_context(StoreContext)]
 #[tokio::test]
+#[cfg_attr(not(feature = "storage-tests"), ignore)]
 async fn test_after_origin_overflow(ctx: &StoreContext) {
     let topic = function_name!();
     fill_store(ctx, TEST_CLIENT_ID, topic, 20).await;
@@ -129,6 +132,7 @@ async fn test_after_origin_overflow(ctx: &StoreContext) {
 #[named]
 #[test_context(StoreContext)]
 #[tokio::test]
+#[cfg_attr(not(feature = "storage-tests"), ignore)]
 async fn test_before_no_origin(ctx: &StoreContext) {
     let topic = function_name!();
     fill_store(ctx, TEST_CLIENT_ID, topic, 20).await;
@@ -163,6 +167,7 @@ async fn test_before_no_origin(ctx: &StoreContext) {
 #[named]
 #[test_context(StoreContext)]
 #[tokio::test]
+#[cfg_attr(not(feature = "storage-tests"), ignore)]
 async fn test_before_origin(ctx: &StoreContext) {
     let topic = function_name!();
     fill_store(ctx, TEST_CLIENT_ID, topic, 20).await;
@@ -208,6 +213,7 @@ async fn test_before_origin(ctx: &StoreContext) {
 #[named]
 #[test_context(StoreContext)]
 #[tokio::test]
+#[cfg_attr(not(feature = "storage-tests"), ignore)]
 async fn test_before_origin_overflow(ctx: &StoreContext) {
     let topic = function_name!();
     fill_store(ctx, TEST_CLIENT_ID, topic, 20).await;
@@ -245,6 +251,7 @@ async fn test_before_origin_overflow(ctx: &StoreContext) {
 #[named]
 #[test_context(StoreContext)]
 #[tokio::test]
+#[cfg_attr(not(feature = "storage-tests"), ignore)]
 async fn test_multi_topic(ctx: &StoreContext) {
     const NUM_TOPICS: usize = 5;
     const QUERY_SIZE: usize = 2;
@@ -289,6 +296,7 @@ async fn test_multi_topic(ctx: &StoreContext) {
 #[named]
 #[test_context(StoreContext)]
 #[tokio::test]
+#[cfg_attr(not(feature = "storage-tests"), ignore)]
 async fn test_multi_clients(ctx: &StoreContext) {
     const NUM_CLIENTS: usize = 5;
     const QUERY_SIZE: usize = 2;
