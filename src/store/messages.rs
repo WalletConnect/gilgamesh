@@ -8,7 +8,7 @@ use {
     },
 };
 
-#[derive(Debug, Model, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Debug, Model, Serialize, Deserialize, PartialEq, Eq)]
 #[model(
     collection_name = "Messages",
     index(keys = r#"doc!{"ts": 1}"#),
@@ -47,8 +47,8 @@ pub trait MessagesStore: 'static + std::fmt::Debug + Send + Sync {
     async fn upsert_message(
         &self,
         client_id: &str,
-        message_id: &str,
         topic: &str,
+        message_id: &str,
         message: &str,
     ) -> Result<(), StoreError>;
     async fn get_messages_after(

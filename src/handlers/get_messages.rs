@@ -21,7 +21,7 @@ pub const MAX_MESSAGE_COUNT: usize = 500;
 /////////////////////////
 
 /// The direction to return messages in.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub enum Direction {
     Forward,

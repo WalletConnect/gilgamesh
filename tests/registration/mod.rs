@@ -43,8 +43,8 @@ async fn test_register(ctx: &mut ServerContext) {
 #[tokio::test]
 async fn test_get_registration(ctx: &mut ServerContext) {
     let (jwt, client_id) = get_client_jwt();
-    let tags = vec!["4000".to_string(), "5***".to_string()];
 
+    let tags = vec!["4000".to_string(), "5***".to_string()];
     let registration = Registration {
         id: None,
         client_id: client_id.to_string(),

@@ -5,7 +5,7 @@ use {
         increment_counter,
         relay::signature::RequireValidSignature,
         state::{AppState, CachedRegistration},
-        store::registrations::Registration,
+        store::{registrations::Registration, StoreError},
         tags::match_tag,
     },
     axum::{extract::State as StateExtractor, Json},
@@ -41,10 +41,15 @@ pub async fn handler(
         increment_counter!(state.metrics, cached_registrations);
         registration
     } else {
-        let registration = state
+        let registration = match state
             .registration_store
             .get_registration(payload.client_id.as_str())
-            .await?;
+            .await
+        {
+            Ok(registration) => registration,
+            Err(StoreError::NotFound(_, _)) => return Ok(Response::default()),
+            Err(e) => return Err(e.into()),
+        };
 
         state
             .registration_cache

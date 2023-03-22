@@ -115,8 +115,8 @@ impl MessagesStore for MongoStore {
     async fn upsert_message(
         &self,
         client_id: &str,
-        message_id: &str,
         topic: &str,
+        message_id: &str,
         message: &str,
     ) -> Result<(), StoreError> {
         let filter = doc! {

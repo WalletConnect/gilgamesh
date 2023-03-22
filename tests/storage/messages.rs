@@ -343,7 +343,7 @@ async fn fill_store(ctx: &StoreContext, client_id: &str, topic: &str, size: i32)
     for id in 1..(size + 1) {
         ctx.storage
             .store
-            .upsert_message(client_id, &id.to_string(), topic, id.to_string().as_str())
+            .upsert_message(client_id, topic, &id.to_string(), id.to_string().as_str())
             .await
             .unwrap();
         std::thread::sleep(time::Duration::from_millis(2));
