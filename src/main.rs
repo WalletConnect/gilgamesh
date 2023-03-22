@@ -14,7 +14,8 @@ async fn main() -> error::Result<()> {
         "Failed to load configuration, please ensure that all environment variables are defined.",
     );
 
-    let result = gilgamesh::bootstrap(shutdown, config).await;
+    let options = gilgamesh::Options::default();
+    let result = gilgamesh::bootstrap(shutdown, config, options).await;
 
     logger.stop();
 

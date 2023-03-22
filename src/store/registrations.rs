@@ -11,7 +11,6 @@ use {
 #[derive(Clone, Debug, Model, Serialize, Deserialize, PartialEq, Eq)]
 #[model(
     collection_name = "Registrations",
-    index(keys = r#"doc!{"ts": 1}"#),
     index(keys = r#"doc!{"client_id": 1}"#, options = r#"doc!{"unique": true}"#)
 )]
 pub struct Registration {

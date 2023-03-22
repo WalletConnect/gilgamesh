@@ -29,7 +29,7 @@ pub enum Direction {
 }
 
 /// The max number of messages to return in the response.
-#[derive(Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct MessageCount(usize);
 
 impl Default for MessageCount {
@@ -45,7 +45,7 @@ impl MessageCount {
 }
 
 /// The request body for the get messages endpoint.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GetMessagesBody {
     pub topic: String,

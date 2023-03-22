@@ -37,6 +37,7 @@ impl MongoStore {
         })?;
 
         Message::sync(&db).await?;
+        Registration::sync(&db).await?;
 
         Ok(Self { db })
     }
@@ -174,7 +175,7 @@ impl RegistrationStore for MongoStore {
         relay_url: &str,
     ) -> Result<(), StoreError> {
         let filter = doc! {
-            "message_id": &client_id,
+            "client_id": &client_id,
         };
 
         let update = doc! {
@@ -187,7 +188,7 @@ impl RegistrationStore for MongoStore {
 
         let option = FindOneAndUpdateOptions::builder().upsert(true).build();
 
-        match Message::find_one_and_update(&self.db, filter, update, option).await? {
+        match Registration::find_one_and_update(&self.db, filter, update, option).await? {
             Some(_) => Ok(()),
             None => Ok(()),
         }

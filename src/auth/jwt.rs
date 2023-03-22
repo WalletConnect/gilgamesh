@@ -1,5 +1,4 @@
 use {
-    super::ClientId,
     relay_rpc::{
         auth::{
             JwtClaims,
@@ -10,7 +9,7 @@ use {
             DID_PREFIX,
             JWT_DELIMITER,
         },
-        domain::DecodedClientId,
+        domain::{ClientId, DecodedClientId},
     },
     std::collections::HashSet,
 };

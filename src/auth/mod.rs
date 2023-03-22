@@ -4,21 +4,9 @@ use {
         extract::FromRequestParts,
         http::{header::AUTHORIZATION, request::Parts, StatusCode},
     },
-    relay_rpc::domain::DecodedClientId,
-    std::sync::Arc,
 };
 
 pub mod jwt;
-
-#[derive(Debug, Hash, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
-#[serde(transparent)]
-pub struct ClientId(Arc<str>);
-
-impl From<DecodedClientId> for ClientId {
-    fn from(val: DecodedClientId) -> Self {
-        Self(val.to_string().into())
-    }
-}
 
 const ERR_MISSING: &str = "`Authorization` header is missing";
 const ERR_CHARS: &str = "`Authorization` header contains invalid characters";
@@ -93,20 +81,5 @@ impl AuthBearer {
             // Found nothing
             _ => Err((StatusCode::BAD_REQUEST, ERR_WRONG_BEARER)),
         }
-    }
-}
-
-/// A client ID is a DID string.
-impl ClientId {
-    pub fn new(client_id: impl Into<String>) -> Self {
-        Self(client_id.into().into())
-    }
-
-    pub fn value(&self) -> &str {
-        &self.0
-    }
-
-    pub fn into_value(self) -> Arc<str> {
-        self.0
     }
 }

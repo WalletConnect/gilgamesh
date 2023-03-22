@@ -1,8 +1,10 @@
 use {
-    gilgamesh::config::Configuration,
+    crate::storage::mocks::{messages::MockMessageStore, registrations::MockRegistrationStore},
+    gilgamesh::{config::Configuration, Options},
     std::{
         env,
         net::{IpAddr, Ipv4Addr, SocketAddr, SocketAddrV4, TcpListener},
+        sync::Arc,
     },
     tokio::{
         runtime::Handle,
@@ -13,6 +15,8 @@ use {
 
 pub struct Gilgamesh {
     pub public_addr: SocketAddr,
+    pub message_store: Arc<MockMessageStore>,
+    pub registration_store: Arc<MockRegistrationStore>,
     shutdown_signal: broadcast::Sender<()>,
     is_shutdown: bool,
 }
@@ -24,17 +28,24 @@ impl Gilgamesh {
     pub async fn start() -> Self {
         let public_port = get_random_port();
         let rt = Handle::current();
-        let public_addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::UNSPECIFIED), public_port);
+        let public_addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), public_port);
 
         let (signal, shutdown) = broadcast::channel(1);
 
+        let message_store = Arc::new(MockMessageStore::new());
+        let registration_store = Arc::new(MockRegistrationStore::new());
+
+        let options = Options {
+            messages_store: Some(message_store.clone()),
+            registration_store: Some(registration_store.clone()),
+        };
+
         std::thread::spawn(move || {
             rt.block_on(async move {
-                let public_port = get_random_port();
-                let mongo_address = match env::var("MONGO_ADDRESS") {
-                    Ok(val) => val,
-                    Err(_) => "mongodb://admin:admin@mongo:27017/gilgamesh?authSource=admin".into(),
-                };
+                let public_port = public_port;
+                let mongo_address = env::var("MONGO_ADDRESS").unwrap_or(
+                    "mongodb://admin:admin@mongo:27017/gilgamesh?authSource=admin".into(),
+                );
 
                 let config: Configuration = Configuration {
                     port: public_port,
@@ -49,7 +60,7 @@ impl Gilgamesh {
                     telemetry_prometheus_port: Some(get_random_port()),
                 };
 
-                gilgamesh::bootstrap(shutdown, config).await
+                gilgamesh::bootstrap(shutdown, config, options).await
             })
             .unwrap();
         });
@@ -60,6 +71,8 @@ impl Gilgamesh {
 
         Self {
             public_addr,
+            message_store,
+            registration_store,
             shutdown_signal: signal,
             is_shutdown: false,
         }
