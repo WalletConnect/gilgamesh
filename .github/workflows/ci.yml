@@ -143,10 +143,10 @@ jobs:
           install -vDm 755 "$SCCACHE_FILE/sccache" "$HOME/.local/bin/sccache"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      - name: "Install Rust ${{ matrix.rust }}"
+      - name: "Install Rust nightly"
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: nightly
           profile: minimal
           override: true
           components: rustfmt, clippy
