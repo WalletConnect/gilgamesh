@@ -64,6 +64,7 @@ thiserror = "1.0"
 
 [features]
 storage-tests = []
+ci-tests = []
 
 [dev-dependencies]
 test-context = "0.1"
