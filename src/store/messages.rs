@@ -2,6 +2,7 @@ use {
     super::StoreError,
     async_trait::async_trait,
     serde::{Deserialize, Serialize},
+    std::sync::Arc,
     wither::{
         bson::{self, doc, oid::ObjectId},
         Model,
@@ -26,26 +27,29 @@ pub struct Message {
     /// The number of milliseconds since Epoch
     #[serde(rename = "ts")]
     pub timestamp: bson::DateTime,
+    /// The messages method (`publish`/`subscription`).
+    pub method: Arc<str>,
     /// The message's client ID.
-    pub client_id: String,
+    pub client_id: Arc<str>,
     /// The message's topic ID.
-    pub topic: String,
+    pub topic: Arc<str>,
     /// The SHA256 of the message.
-    pub message_id: String,
+    pub message_id: Arc<str>,
     /// The actual message.
-    pub message: String,
+    pub message: Arc<str>,
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct StoreMessages {
     pub messages: Vec<Message>,
-    pub next_id: Option<String>,
+    pub next_id: Option<Arc<str>>,
 }
 
 #[async_trait]
 pub trait MessagesStore: 'static + std::fmt::Debug + Send + Sync {
     async fn upsert_message(
         &self,
+        method: &str,
         client_id: &str,
         topic: &str,
         message_id: &str,

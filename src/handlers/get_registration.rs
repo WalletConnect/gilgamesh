@@ -16,16 +16,17 @@ pub async fn handler(
     AuthBearer(token): AuthBearer,
 ) -> Result<Json<RegisterPayload>, error::Error> {
     let client_id = Jwt(token).decode(&state.auth_aud.clone())?.to_string();
+    let client_id: Arc<str> = Arc::from(client_id);
 
     increment_counter!(state.metrics, registration_cache_invalidation);
     state
         .registration_cache
-        .invalidate(client_id.as_str())
+        .invalidate(client_id.as_ref())
         .await;
 
     let registration = state
         .registration_store
-        .get_registration(client_id.as_str())
+        .get_registration(client_id.as_ref())
         .await?;
 
     state

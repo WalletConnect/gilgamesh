@@ -33,7 +33,7 @@ async fn test_after_no_origin(ctx: &StoreContext) {
 
     for n in 0..TEST_QUERY_SIZE {
         assert_eq!(
-            result.messages.get(n).unwrap().message_id,
+            result.messages.get(n).unwrap().message_id.as_ref(),
             (1 + n).to_string(),
             "check that item #{} equals expected {}",
             n,
@@ -41,7 +41,7 @@ async fn test_after_no_origin(ctx: &StoreContext) {
         )
     }
 
-    assert_eq!(result.next_id, Some("4".to_string()), "Check next_id");
+    assert_eq!(result.next_id.unwrap().as_ref(), "4", "Check next_id");
 }
 
 // NOTE: Requires the dev MongoDB container (see `ops/docker-compose.yml`).
@@ -75,7 +75,7 @@ async fn test_after_origin(ctx: &StoreContext) {
 
     for n in 0..TEST_QUERY_SIZE {
         assert_eq!(
-            result.messages.get(n).unwrap().message_id,
+            result.messages.get(n).unwrap().message_id.as_ref(),
             (origin + n).to_string(),
             "check that item #{} equals expected {}",
             n,
@@ -84,8 +84,8 @@ async fn test_after_origin(ctx: &StoreContext) {
     }
 
     assert_eq!(
-        result.next_id,
-        Some((origin + TEST_QUERY_SIZE).to_string()),
+        result.next_id.unwrap().as_ref(),
+        (origin + TEST_QUERY_SIZE).to_string(),
         "Check next_id"
     );
 }
@@ -117,7 +117,7 @@ async fn test_after_origin_overflow(ctx: &StoreContext) {
 
     for n in 0..2 {
         assert_eq!(
-            result.messages.get(n).unwrap().message_id,
+            result.messages.get(n).unwrap().message_id.as_ref(),
             (origin + n).to_string(),
             "check that item #{} equals expected {}",
             n,
@@ -152,7 +152,7 @@ async fn test_before_no_origin(ctx: &StoreContext) {
 
     for n in 0..TEST_QUERY_SIZE {
         assert_eq!(
-            result.messages.get(n).unwrap().message_id,
+            result.messages.get(n).unwrap().message_id.as_ref(),
             (20 - n).to_string(),
             "check that item #{} equals expected {}",
             n,
@@ -160,7 +160,7 @@ async fn test_before_no_origin(ctx: &StoreContext) {
         )
     }
 
-    assert_eq!(result.next_id, Some("17".to_string()), "Check next_id");
+    assert_eq!(result.next_id.unwrap().as_ref(), "17", "Check next_id");
 }
 
 // NOTE: Requires the dev MongoDB container (see `ops/docker-compose.yml`).
@@ -194,7 +194,7 @@ async fn test_before_origin(ctx: &StoreContext) {
 
     for n in 0..TEST_QUERY_SIZE {
         assert_eq!(
-            result.messages.get(n).unwrap().message_id,
+            result.messages.get(n).unwrap().message_id.as_ref(),
             (origin - n).to_string(),
             "check that item #{} equals expected {}",
             n,
@@ -203,8 +203,8 @@ async fn test_before_origin(ctx: &StoreContext) {
     }
 
     assert_eq!(
-        result.next_id,
-        Some((origin - TEST_QUERY_SIZE).to_string()),
+        result.next_id.unwrap().as_ref(),
+        (origin - TEST_QUERY_SIZE).to_string(),
         "Check next_id"
     );
 }
@@ -236,7 +236,7 @@ async fn test_before_origin_overflow(ctx: &StoreContext) {
 
     for n in 0..2 {
         assert_eq!(
-            result.messages.get(n).unwrap().message_id,
+            result.messages.get(n).unwrap().message_id.as_ref(),
             (origin - n).to_string(),
             "check that item #{} equals expected {}",
             n,
@@ -281,7 +281,7 @@ async fn test_multi_topic(ctx: &StoreContext) {
         for n in 0..QUERY_SIZE {
             let message = result.messages.get(n).unwrap();
             assert_eq!(
-                message.message_id,
+                message.message_id.as_ref(),
                 (1 + n).to_string(),
                 "check that item #{}/{} equals expected {}",
                 t + 1,
@@ -328,7 +328,7 @@ async fn test_multi_clients(ctx: &StoreContext) {
         for n in 0..QUERY_SIZE {
             let message = result.messages.get(n).unwrap();
             assert_eq!(
-                message.message_id,
+                message.message_id.as_ref(),
                 (1 + n).to_string(),
                 "check that item #{}/{} equals expected {}",
                 t + 1,
@@ -343,7 +343,13 @@ async fn fill_store(ctx: &StoreContext, client_id: &str, topic: &str, size: i32)
     for id in 1..(size + 1) {
         ctx.storage
             .store
-            .upsert_message(client_id, topic, &id.to_string(), id.to_string().as_str())
+            .upsert_message(
+                "publish",
+                client_id,
+                topic,
+                &id.to_string(),
+                id.to_string().as_str(),
+            )
             .await
             .unwrap();
         std::thread::sleep(time::Duration::from_millis(2));

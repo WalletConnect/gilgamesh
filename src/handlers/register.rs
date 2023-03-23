@@ -16,8 +16,8 @@ use {
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct RegisterPayload {
-    pub tags: Vec<String>,
-    pub relay_url: String,
+    pub tags: Vec<Arc<str>>,
+    pub relay_url: Arc<str>,
 }
 
 pub async fn handler(
@@ -32,13 +32,13 @@ pub async fn handler(
         .upsert_registration(
             client_id.value(),
             body.tags.iter().map(AsRef::as_ref).collect(),
-            body.relay_url.as_str(),
+            body.relay_url.as_ref(),
         )
         .await?;
 
     state
         .registration_cache
-        .insert(client_id.value().to_string(), CachedRegistration {
+        .insert(client_id.into_value(), CachedRegistration {
             tags: body.tags.clone(),
             relay_url: body.relay_url.clone(),
         })

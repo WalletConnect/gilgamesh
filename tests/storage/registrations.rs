@@ -4,6 +4,7 @@ use {
         registrations::{Registration, RegistrationStore},
         StoreError,
     },
+    std::sync::Arc,
     test_context::test_context,
 };
 
@@ -28,9 +29,11 @@ async fn test_registration(ctx: &StoreContext) {
         .get_registration(TEST_CLIENT_ID)
         .await
         .unwrap();
-    assert_eq!(registration.client_id, TEST_CLIENT_ID);
-    assert_eq!(registration.relay_url, TEST_RELAY_URL);
-    assert_eq!(registration.tags, TAGS);
+    assert_eq!(registration.client_id.as_ref(), TEST_CLIENT_ID);
+    assert_eq!(registration.relay_url.as_ref(), TEST_RELAY_URL);
+
+    let tags: Vec<&str> = registration.tags.iter().map(Arc::as_ref).collect();
+    assert_eq!(tags, TAGS);
 }
 
 // NOTE: Requires the dev MongoDB container (see `ops/docker-compose.yml`).

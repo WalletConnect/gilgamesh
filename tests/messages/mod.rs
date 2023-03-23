@@ -9,9 +9,11 @@ use {
         },
         store::{messages::Message, registrations::Registration},
     },
+    std::sync::Arc,
     test_context::test_context,
 };
 
+const TEST_METHOD: &str = "publish";
 const TEST_CLIENT_ID: &str = "12345";
 const TEST_MESSAGE_ID: &str = "67890";
 const TEST_TOPIC: &str = "test-topic";
@@ -27,10 +29,11 @@ async fn test_get_message_no_origin_no_count_no_direction(ctx: &mut ServerContex
         .test_add(Message {
             id: None,
             timestamp: Utc::now().into(),
-            client_id: TEST_CLIENT_ID.to_string(),
-            message_id: TEST_MESSAGE_ID.to_string(),
-            topic: TEST_TOPIC.to_string(),
-            message: TEST_MESSAGE.to_string(),
+            method: Arc::from(TEST_METHOD),
+            client_id: Arc::from(TEST_CLIENT_ID),
+            message_id: Arc::from(TEST_MESSAGE_ID),
+            topic: Arc::from(TEST_TOPIC),
+            message: Arc::from(TEST_MESSAGE),
         })
         .await;
 
@@ -52,15 +55,15 @@ async fn test_get_message_no_origin_no_count_no_direction(ctx: &mut ServerContex
 
     let response: GetMessagesResponse = response.json().await.unwrap();
 
-    assert_eq!(response.topic, TEST_TOPIC);
+    assert_eq!(response.topic.as_ref(), TEST_TOPIC);
     assert_eq!(response.direction, Direction::Forward);
-    assert_eq!(response.next_id, Some("after".to_string()));
+    assert_eq!(response.next_id.unwrap().as_ref(), "after");
 
     assert_eq!(response.messages.len(), 1);
-    assert_eq!(response.messages[0].client_id, TEST_CLIENT_ID);
-    assert_eq!(response.messages[0].topic, TEST_TOPIC);
-    assert_eq!(response.messages[0].message_id, TEST_MESSAGE_ID);
-    assert_eq!(response.messages[0].message, TEST_MESSAGE);
+    assert_eq!(response.messages[0].client_id.as_ref(), TEST_CLIENT_ID);
+    assert_eq!(response.messages[0].topic.as_ref(), TEST_TOPIC);
+    assert_eq!(response.messages[0].message_id.as_ref(), TEST_MESSAGE_ID);
+    assert_eq!(response.messages[0].message.as_ref(), TEST_MESSAGE);
 }
 
 #[test_context(ServerContext)]
@@ -73,10 +76,11 @@ async fn test_get_message_origin_count_forward(ctx: &mut ServerContext) {
         .test_add(Message {
             id: None,
             timestamp: Utc::now().into(),
-            client_id: TEST_CLIENT_ID.to_string(),
-            message_id: TEST_MESSAGE_ID.to_string(),
-            topic: TEST_TOPIC.to_string(),
-            message: TEST_MESSAGE.to_string(),
+            method: Arc::from(TEST_METHOD),
+            client_id: Arc::from(TEST_CLIENT_ID),
+            message_id: Arc::from(TEST_MESSAGE_ID),
+            topic: Arc::from(TEST_TOPIC),
+            message: Arc::from(TEST_MESSAGE),
         })
         .await;
 
@@ -103,15 +107,15 @@ async fn test_get_message_origin_count_forward(ctx: &mut ServerContext) {
 
     let response: GetMessagesResponse = response.json().await.unwrap();
 
-    assert_eq!(response.topic, TEST_TOPIC);
+    assert_eq!(response.topic.as_ref(), TEST_TOPIC);
     assert_eq!(response.direction, Direction::Forward);
-    assert_eq!(response.next_id, Some("after".to_string()));
+    assert_eq!(response.next_id.unwrap().as_ref(), "after");
 
     assert_eq!(response.messages.len(), 1);
-    assert_eq!(response.messages[0].client_id, TEST_CLIENT_ID);
-    assert_eq!(response.messages[0].topic, TEST_TOPIC);
-    assert_eq!(response.messages[0].message_id, TEST_MESSAGE_ID);
-    assert_eq!(response.messages[0].message, TEST_MESSAGE);
+    assert_eq!(response.messages[0].client_id.as_ref(), TEST_CLIENT_ID);
+    assert_eq!(response.messages[0].topic.as_ref(), TEST_TOPIC);
+    assert_eq!(response.messages[0].message_id.as_ref(), TEST_MESSAGE_ID);
+    assert_eq!(response.messages[0].message.as_ref(), TEST_MESSAGE);
 }
 
 #[test_context(ServerContext)]
@@ -124,10 +128,11 @@ async fn test_get_message_origin_count_backward(ctx: &mut ServerContext) {
         .test_add(Message {
             id: None,
             timestamp: Utc::now().into(),
-            client_id: TEST_CLIENT_ID.to_string(),
-            message_id: TEST_MESSAGE_ID.to_string(),
-            topic: TEST_TOPIC.to_string(),
-            message: TEST_MESSAGE.to_string(),
+            method: Arc::from(TEST_METHOD),
+            client_id: Arc::from(TEST_CLIENT_ID),
+            message_id: Arc::from(TEST_MESSAGE_ID),
+            topic: Arc::from(TEST_TOPIC),
+            message: Arc::from(TEST_MESSAGE),
         })
         .await;
 
@@ -154,15 +159,15 @@ async fn test_get_message_origin_count_backward(ctx: &mut ServerContext) {
 
     let response: GetMessagesResponse = response.json().await.unwrap();
 
-    assert_eq!(response.topic, TEST_TOPIC);
+    assert_eq!(response.topic.as_ref(), TEST_TOPIC);
     assert_eq!(response.direction, Direction::Backward);
-    assert_eq!(response.next_id, Some("before".to_string()));
+    assert_eq!(response.next_id.unwrap().as_ref(), "before");
 
     assert_eq!(response.messages.len(), 1);
-    assert_eq!(response.messages[0].client_id, TEST_CLIENT_ID);
-    assert_eq!(response.messages[0].topic, TEST_TOPIC);
-    assert_eq!(response.messages[0].message_id, TEST_MESSAGE_ID);
-    assert_eq!(response.messages[0].message, TEST_MESSAGE);
+    assert_eq!(response.messages[0].client_id.as_ref(), TEST_CLIENT_ID);
+    assert_eq!(response.messages[0].topic.as_ref(), TEST_TOPIC);
+    assert_eq!(response.messages[0].message_id.as_ref(), TEST_MESSAGE_ID);
+    assert_eq!(response.messages[0].message.as_ref(), TEST_MESSAGE);
 }
 
 #[test_context(ServerContext)]
@@ -170,18 +175,18 @@ async fn test_get_message_origin_count_backward(ctx: &mut ServerContext) {
 async fn test_save_message_saved(ctx: &mut ServerContext) {
     let (jwt, client_id) = get_client_jwt();
 
-    let tags = vec!["4000".to_string(), "5***".to_string()];
+    let tags = vec![Arc::from("4000"), Arc::from("5***")];
     let registration = Registration {
         id: None,
-        client_id: client_id.to_string(),
+        client_id: client_id.clone().into_value(),
         tags: tags.clone(),
-        relay_url: TEST_RELAY_URL.to_string(),
+        relay_url: Arc::from(TEST_RELAY_URL),
     };
 
     ctx.server
         .registration_store
         .registrations
-        .insert(client_id.value().to_string(), registration)
+        .insert(client_id.to_string(), registration)
         .await;
 
     let client = reqwest::Client::new();
@@ -189,11 +194,12 @@ async fn test_save_message_saved(ctx: &mut ServerContext) {
     let response = client
         .post(format!("http://{}/messages", ctx.server.public_addr))
         .json(&HistoryPayload {
-            client_id: client_id.to_string(),
-            message_id: format!("{TEST_MESSAGE_ID}-1"),
-            topic: TEST_TOPIC.to_string(),
+            method: Arc::from(TEST_METHOD),
+            client_id: client_id.clone().into_value(),
+            message_id: Arc::from(format!("{TEST_MESSAGE_ID}-1")),
+            topic: Arc::from(TEST_TOPIC),
             tag: 4000,
-            message: TEST_MESSAGE.to_string(),
+            message: Arc::from(TEST_MESSAGE),
         })
         .header(http::header::AUTHORIZATION, format!("Bearer {jwt}"))
         .send()
@@ -210,11 +216,12 @@ async fn test_save_message_saved(ctx: &mut ServerContext) {
     let response = client
         .post(format!("http://{}/messages", ctx.server.public_addr))
         .json(&HistoryPayload {
-            client_id: client_id.to_string(),
-            message_id: format!("{TEST_MESSAGE_ID}-2"),
-            topic: TEST_TOPIC.to_string(),
+            method: Arc::from(TEST_METHOD),
+            client_id: client_id.clone().into_value(),
+            message_id: Arc::from(format!("{TEST_MESSAGE_ID}-2")),
+            topic: Arc::from(TEST_TOPIC),
             tag: 5123,
-            message: TEST_MESSAGE.to_string(),
+            message: Arc::from(TEST_MESSAGE),
         })
         .header(http::header::AUTHORIZATION, format!("Bearer {jwt}"))
         .send()
@@ -227,9 +234,6 @@ async fn test_save_message_saved(ctx: &mut ServerContext) {
         response.status(),
         response.text().await
     );
-
-    let _all = ctx.server.message_store.test_get_keys();
-    let _client_id = client_id.to_string();
 
     let msg = ctx
         .server
@@ -241,10 +245,10 @@ async fn test_save_message_saved(ctx: &mut ServerContext) {
         )
         .await
         .unwrap();
-    assert_eq!(msg.client_id, client_id.to_string());
-    assert_eq!(msg.topic, TEST_TOPIC);
-    assert_eq!(msg.message_id, format!("{TEST_MESSAGE_ID}-1"));
-    assert_eq!(msg.message, TEST_MESSAGE);
+    assert_eq!(msg.client_id.as_ref(), client_id.to_string());
+    assert_eq!(msg.topic.as_ref(), TEST_TOPIC);
+    assert_eq!(msg.message_id.as_ref(), format!("{TEST_MESSAGE_ID}-1"));
+    assert_eq!(msg.message.as_ref(), TEST_MESSAGE);
 
     let msg = ctx
         .server
@@ -256,10 +260,10 @@ async fn test_save_message_saved(ctx: &mut ServerContext) {
         )
         .await
         .unwrap();
-    assert_eq!(msg.client_id, client_id.to_string());
-    assert_eq!(msg.topic, TEST_TOPIC);
-    assert_eq!(msg.message_id, format!("{TEST_MESSAGE_ID}-2"));
-    assert_eq!(msg.message, TEST_MESSAGE);
+    assert_eq!(msg.client_id.as_ref(), client_id.to_string());
+    assert_eq!(msg.topic.as_ref(), TEST_TOPIC);
+    assert_eq!(msg.message_id.as_ref(), format!("{TEST_MESSAGE_ID}-2"));
+    assert_eq!(msg.message.as_ref(), TEST_MESSAGE);
 }
 
 #[test_context(ServerContext)]
@@ -267,18 +271,18 @@ async fn test_save_message_saved(ctx: &mut ServerContext) {
 async fn test_save_message_filtered_out(ctx: &mut ServerContext) {
     let (jwt, client_id) = get_client_jwt();
 
-    let tags = vec!["4000".to_string(), "5***".to_string()];
+    let tags = vec![Arc::from("4000"), Arc::from("5***")];
     let registration = Registration {
         id: None,
-        client_id: client_id.to_string(),
+        client_id: client_id.clone().into_value(),
         tags: tags.clone(),
-        relay_url: TEST_RELAY_URL.to_string(),
+        relay_url: Arc::from(TEST_RELAY_URL),
     };
 
     ctx.server
         .registration_store
         .registrations
-        .insert(client_id.value().to_string(), registration)
+        .insert(client_id.to_string(), registration)
         .await;
 
     let client = reqwest::Client::new();
@@ -286,11 +290,12 @@ async fn test_save_message_filtered_out(ctx: &mut ServerContext) {
     let response = client
         .post(format!("http://{}/messages", ctx.server.public_addr))
         .json(&HistoryPayload {
-            client_id: client_id.to_string(),
-            message_id: format!("{TEST_MESSAGE_ID}-1"),
-            topic: TEST_TOPIC.to_string(),
+            method: Arc::from(TEST_METHOD),
+            client_id: client_id.clone().into_value(),
+            message_id: Arc::from(format!("{TEST_MESSAGE_ID}-1")),
+            topic: Arc::from(TEST_TOPIC),
             tag: 4123,
-            message: TEST_MESSAGE.to_string(),
+            message: Arc::from(TEST_MESSAGE),
         })
         .header(http::header::AUTHORIZATION, format!("Bearer {jwt}"))
         .send()
@@ -307,11 +312,12 @@ async fn test_save_message_filtered_out(ctx: &mut ServerContext) {
     let response = client
         .post(format!("http://{}/messages", ctx.server.public_addr))
         .json(&HistoryPayload {
-            client_id: client_id.to_string(),
-            message_id: format!("{TEST_MESSAGE_ID}-2"),
-            topic: TEST_TOPIC.to_string(),
+            method: Arc::from(TEST_METHOD),
+            client_id: client_id.clone().into_value(),
+            message_id: Arc::from(format!("{TEST_MESSAGE_ID}-2")),
+            topic: Arc::from(TEST_TOPIC),
             tag: 5123,
-            message: TEST_MESSAGE.to_string(),
+            message: Arc::from(TEST_MESSAGE),
         })
         .header(http::header::AUTHORIZATION, format!("Bearer {jwt}"))
         .send()
@@ -324,9 +330,6 @@ async fn test_save_message_filtered_out(ctx: &mut ServerContext) {
         response.status(),
         response.text().await
     );
-
-    let _all = ctx.server.message_store.test_get_keys();
-    let _client_id = client_id.to_string();
 
     let msg = ctx
         .server
@@ -349,10 +352,10 @@ async fn test_save_message_filtered_out(ctx: &mut ServerContext) {
         )
         .await
         .unwrap();
-    assert_eq!(msg.client_id, client_id.to_string());
-    assert_eq!(msg.topic, TEST_TOPIC);
-    assert_eq!(msg.message_id, format!("{TEST_MESSAGE_ID}-2"));
-    assert_eq!(msg.message, TEST_MESSAGE);
+    assert_eq!(msg.client_id, client_id.into_value());
+    assert_eq!(msg.topic.as_ref(), TEST_TOPIC);
+    assert_eq!(msg.message_id.as_ref(), format!("{TEST_MESSAGE_ID}-2"));
+    assert_eq!(msg.message.as_ref(), TEST_MESSAGE);
 }
 
 #[test_context(ServerContext)]
@@ -360,18 +363,18 @@ async fn test_save_message_filtered_out(ctx: &mut ServerContext) {
 async fn test_save_message_no_registration(ctx: &mut ServerContext) {
     let (jwt, client_id) = get_client_jwt();
 
-    let tags = vec!["4000".to_string(), "5***".to_string()];
+    let tags = vec![Arc::from("4000"), Arc::from("5***")];
     let registration = Registration {
         id: None,
-        client_id: client_id.to_string(),
+        client_id: client_id.clone().into_value(),
         tags: tags.clone(),
-        relay_url: TEST_RELAY_URL.to_string(),
+        relay_url: Arc::from(TEST_RELAY_URL),
     };
 
     ctx.server
         .registration_store
         .registrations
-        .insert(client_id.value().to_string(), registration)
+        .insert(client_id.to_string(), registration)
         .await;
 
     let client = reqwest::Client::new();
@@ -379,11 +382,12 @@ async fn test_save_message_no_registration(ctx: &mut ServerContext) {
     let response = client
         .post(format!("http://{}/messages", ctx.server.public_addr))
         .json(&HistoryPayload {
-            client_id: TEST_CLIENT_ID.to_string(),
-            message_id: TEST_MESSAGE_ID.to_string(),
-            topic: TEST_TOPIC.to_string(),
+            method: Arc::from(TEST_METHOD),
+            client_id: Arc::from(TEST_CLIENT_ID),
+            message_id: Arc::from(TEST_MESSAGE_ID),
+            topic: Arc::from(TEST_TOPIC),
             tag: 4000,
-            message: TEST_MESSAGE.to_string(),
+            message: Arc::from(TEST_MESSAGE),
         })
         .header(http::header::AUTHORIZATION, format!("Bearer {jwt}"))
         .send()
@@ -396,9 +400,6 @@ async fn test_save_message_no_registration(ctx: &mut ServerContext) {
         response.status(),
         response.text().await
     );
-
-    let _all = ctx.server.message_store.test_get_keys();
-    let _client_id = client_id.to_string();
 
     let msg = ctx
         .server

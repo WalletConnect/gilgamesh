@@ -16,8 +16,8 @@ pub type RegistrationStorageArc = Arc<dyn RegistrationStore + Send + Sync + 'sta
 
 #[derive(Clone)]
 pub struct CachedRegistration {
-    pub tags: Vec<String>,
-    pub relay_url: String,
+    pub tags: Vec<Arc<str>>,
+    pub relay_url: Arc<str>,
 }
 
 pub trait State {
@@ -35,7 +35,7 @@ pub struct AppState {
     pub metrics: Option<Metrics>,
     pub messages_store: MessagesStorageArc,
     pub registration_store: RegistrationStorageArc,
-    pub registration_cache: Cache<String, CachedRegistration>,
+    pub registration_cache: Cache<Arc<str>, CachedRegistration>,
     pub relay_client: RelayClient,
     pub auth_aud: HashSet<String>,
 }

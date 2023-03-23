@@ -2,6 +2,7 @@ use {
     super::StoreError,
     async_trait::async_trait,
     serde::{Deserialize, Serialize},
+    std::sync::Arc,
     wither::{
         bson::{doc, oid::ObjectId},
         Model,
@@ -18,11 +19,11 @@ pub struct Registration {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
     /// The 'client_id' of the registration.
-    pub client_id: String,
+    pub client_id: Arc<str>,
     /// The registered tags
-    pub tags: Vec<String>,
+    pub tags: Vec<Arc<str>>,
     /// The registered relay_url
-    pub relay_url: String,
+    pub relay_url: Arc<str>,
 }
 
 #[async_trait]

@@ -49,8 +49,8 @@ impl MessageCount {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GetMessagesBody {
-    pub topic: String,
-    pub origin_id: Option<String>,
+    pub topic: Arc<str>,
+    pub origin_id: Option<Arc<str>>,
     #[serde(default)]
     pub message_count: MessageCount,
     pub direction: Option<Direction>,
@@ -62,9 +62,9 @@ pub struct GetMessagesBody {
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GetMessagesResponse {
-    pub topic: String,
+    pub topic: Arc<str>,
     pub direction: Direction,
-    pub next_id: Option<String>,
+    pub next_id: Option<Arc<str>>,
     pub messages: Vec<Message>,
 }
 
@@ -77,9 +77,7 @@ pub async fn handler(
     query: Query<GetMessagesBody>,
 ) -> Result<Json<GetMessagesResponse>, error::Error> {
     let client_id = Jwt(token).decode(&state.auth_aud.clone())?;
-
     let direction = query.direction.unwrap_or(Direction::Forward);
-    let topic = query.topic.clone();
 
     let StoreMessages { messages, next_id } = match (&query.origin_id, direction) {
         (origin_id, Direction::Forward) => {
@@ -87,7 +85,7 @@ pub async fn handler(
                 .messages_store
                 .get_messages_after(
                     client_id.value(),
-                    topic.as_str(),
+                    query.topic.as_ref(),
                     origin_id.as_deref(),
                     query.message_count.limit(),
                 )
@@ -98,7 +96,7 @@ pub async fn handler(
                 .messages_store
                 .get_messages_before(
                     client_id.value(),
-                    query.topic.as_str(),
+                    query.topic.as_ref(),
                     origin_id.as_deref(),
                     query.message_count.limit(),
                 )
@@ -110,7 +108,7 @@ pub async fn handler(
     increment_counter_with!(state.metrics, served_items, messages.len() as u64);
 
     let response = GetMessagesResponse {
-        topic,
+        topic: query.topic.clone(),
         direction,
         next_id,
         messages,

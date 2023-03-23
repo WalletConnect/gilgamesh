@@ -5,7 +5,7 @@ use {
         StoreError,
     },
     moka::future::Cache,
-    std::fmt::Debug,
+    std::{fmt::Debug, sync::Arc},
 };
 
 #[derive(Debug)]
@@ -31,9 +31,9 @@ impl RegistrationStore for MockRegistrationStore {
     ) -> Result<(), StoreError> {
         let reg = Registration {
             id: None,
-            client_id: client_id.to_string(),
-            tags: tags.iter().map(|s| s.to_string()).collect(),
-            relay_url: relay_url.to_string(),
+            client_id: Arc::from(client_id),
+            tags: tags.iter().map(|s| Arc::from(s.to_string())).collect(),
+            relay_url: Arc::from(relay_url),
         };
 
         self.registrations.insert(client_id.to_string(), reg).await;

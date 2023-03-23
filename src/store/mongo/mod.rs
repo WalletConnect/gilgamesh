@@ -114,6 +114,7 @@ impl MongoStore {
 impl MessagesStore for MongoStore {
     async fn upsert_message(
         &self,
+        method: &str,
         client_id: &str,
         topic: &str,
         message_id: &str,
@@ -128,6 +129,7 @@ impl MessagesStore for MongoStore {
         let update = doc! {
             "$set": {
                 "ts": Utc::now(),
+                "method": &method,
                 "client_id": &client_id,
                 "topic": &topic,
                 "message_id": &message_id,

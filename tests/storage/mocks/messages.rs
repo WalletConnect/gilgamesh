@@ -6,7 +6,7 @@ use {
         StoreError,
     },
     moka::future::Cache,
-    std::fmt::Debug,
+    std::{fmt::Debug, sync::Arc},
 };
 
 #[derive(Debug)]
@@ -39,15 +39,11 @@ impl MockMessageStore {
 
     pub async fn test_add(&self, message: Message) {
         let key = cache_key(
-            message.client_id.as_str(),
-            message.topic.as_str(),
-            message.message_id.as_str(),
+            message.client_id.as_ref(),
+            message.topic.as_ref(),
+            message.message_id.as_ref(),
         );
         self.messages.insert(key, message).await;
-    }
-
-    pub fn test_get_keys(&self) -> Vec<String> {
-        self.messages.iter().map(|(k, _)| k.to_string()).collect()
     }
 
     pub fn test_get_messages(&self) -> Vec<Message> {
@@ -59,6 +55,7 @@ impl MockMessageStore {
 impl MessagesStore for MockMessageStore {
     async fn upsert_message(
         &self,
+        method: &str,
         client_id: &str,
         topic: &str,
         message_id: &str,
@@ -67,10 +64,11 @@ impl MessagesStore for MockMessageStore {
         self.test_add(Message {
             id: None,
             timestamp: Utc::now().into(),
-            client_id: client_id.to_string(),
-            message_id: message_id.to_string(),
-            topic: topic.to_string(),
-            message: message.to_string(),
+            method: Arc::from(method),
+            client_id: Arc::from(client_id),
+            message_id: Arc::from(message_id),
+            topic: Arc::from(topic),
+            message: Arc::from(message),
         })
         .await;
 
@@ -93,7 +91,7 @@ impl MessagesStore for MockMessageStore {
 
         Ok(StoreMessages {
             messages: self.test_get_messages(),
-            next_id: Some("after".to_string()),
+            next_id: Some(Arc::from("after")),
         })
     }
 
@@ -113,7 +111,7 @@ impl MessagesStore for MockMessageStore {
 
         Ok(StoreMessages {
             messages: self.test_get_messages(),
-            next_id: Some("before".to_string()),
+            next_id: Some(Arc::from("before")),
         })
     }
 }

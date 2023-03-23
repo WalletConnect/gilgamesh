@@ -16,11 +16,12 @@ use {
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct HistoryPayload {
-    pub client_id: String,
-    pub topic: String,
-    pub message_id: String,
+    pub method: Arc<str>,
+    pub client_id: Arc<str>,
+    pub topic: Arc<str>,
+    pub message_id: Arc<str>,
     pub tag: u32,
-    pub message: String,
+    pub message: Arc<str>,
 }
 
 pub async fn handler(
@@ -31,7 +32,7 @@ pub async fn handler(
 
     let registration = if let Some(registration) = state
         .registration_cache
-        .get(payload.client_id.clone().as_str())
+        .get(payload.client_id.as_ref())
         .map(|r| Registration {
             id: None,
             client_id: payload.client_id.clone(),
@@ -43,7 +44,7 @@ pub async fn handler(
     } else {
         let registration = match state
             .registration_store
-            .get_registration(payload.client_id.as_str())
+            .get_registration(payload.client_id.as_ref())
             .await
         {
             Ok(registration) => registration,
@@ -69,10 +70,11 @@ pub async fn handler(
             state
                 .messages_store
                 .upsert_message(
-                    payload.client_id.as_str(),
-                    payload.topic.as_str(),
-                    payload.message_id.as_str(),
-                    payload.message.as_str(),
+                    payload.method.as_ref(),
+                    payload.client_id.as_ref(),
+                    payload.topic.as_ref(),
+                    payload.message_id.as_ref(),
+                    payload.message.as_ref(),
                 )
                 .await?;
 
