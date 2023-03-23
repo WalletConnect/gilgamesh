@@ -57,7 +57,7 @@ jobs:
             rust: stable
             cache: {}
         include:
-            sccache-path: /home/runner/.cache/sccache
+          - sccache-path: /home/runner/.cache/sccache
     env:
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
