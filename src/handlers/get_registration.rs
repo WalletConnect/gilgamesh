@@ -1,12 +1,13 @@
 use {
     super::register::RegisterPayload,
     crate::{
-        auth::{jwt, AuthBearer},
+        auth::AuthBearer,
         error,
         increment_counter,
         state::{AppState, CachedRegistration},
     },
     axum::{extract::State, Json},
+    relay_rpc::auth::Jwt,
     std::sync::Arc,
 };
 
@@ -14,7 +15,7 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     AuthBearer(token): AuthBearer,
 ) -> Result<Json<RegisterPayload>, error::Error> {
-    let client_id = jwt::Jwt(token).decode(&state.auth_aud.clone())?.to_string();
+    let client_id = Jwt(token).decode(&state.auth_aud.clone())?.to_string();
 
     increment_counter!(state.metrics, registration_cache_invalidation);
     state

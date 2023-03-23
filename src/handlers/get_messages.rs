@@ -1,6 +1,6 @@
 use {
     crate::{
-        auth::{jwt, AuthBearer},
+        auth::AuthBearer,
         error,
         increment_counter,
         increment_counter_with,
@@ -11,6 +11,7 @@ use {
         extract::{Query, State},
         Json,
     },
+    relay_rpc::auth::Jwt,
     serde::{Deserialize, Serialize},
     std::{cmp, sync::Arc},
 };
@@ -75,7 +76,7 @@ pub async fn handler(
     AuthBearer(token): AuthBearer,
     query: Query<GetMessagesBody>,
 ) -> Result<Json<GetMessagesResponse>, error::Error> {
-    let client_id = jwt::Jwt(token).decode(&state.auth_aud.clone())?;
+    let client_id = Jwt(token).decode(&state.auth_aud.clone())?;
 
     let direction = query.direction.unwrap_or(Direction::Forward);
     let topic = query.topic.clone();

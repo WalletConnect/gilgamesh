@@ -6,8 +6,6 @@ use {
     },
 };
 
-pub mod jwt;
-
 const ERR_MISSING: &str = "`Authorization` header is missing";
 const ERR_CHARS: &str = "`Authorization` header contains invalid characters";
 const ERR_WRONG_BEARER: &str = "`Authorization` header must be a bearer token";
