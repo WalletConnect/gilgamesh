@@ -66,7 +66,7 @@ impl Metrics {
 
         let served_items = meter
             .u64_counter("served_items")
-            .with_description("The number of stored items served")
+            .with_description("The number of messages served to clients")
             .init();
 
         let register = meter

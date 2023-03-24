@@ -11,9 +11,6 @@ terraform {
   }
 
   required_providers {
-    assert = {
-      source = "bwoznicki/assert"
-    }
     aws = {
       source  = "hashicorp/aws"
       version = "~> 4.50"

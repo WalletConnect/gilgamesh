@@ -1,31 +1,38 @@
 variable "region" {
-  type    = string
-  default = "eu-central-1"
+  description = "The AWS region to deploy to."
+  type        = string
+  default     = "eu-central-1"
 }
 
 variable "azs" {
-  type    = list(string)
-  default = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
+  description = "The AWS availability zones to deploy to."
+  type        = list(string)
+  default     = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
 }
 
 variable "public_url" {
-  type    = string
-  default = "history.walletconnect.com"
+  description = "The public URL of the service."
+  type        = string
+  default     = "history.walletconnect.com"
 }
 
 variable "grafana_endpoint" {
-  type = string
+  description = "The endpoint of the Grafana instance used for monitoring."
+  type        = string
 }
 
 variable "image_version" {
-  type    = string
-  default = ""
+  description = "Optional override for the Docker image version to deploy. Default is `latest`"
+  type        = string
+  default     = ""
 }
 
 variable "docdb_primary_instance_class" {
-  type = string
+  description = "The instance class of the primary MongoDB server. See https://docs.aws.amazon.com/documentdb/latest/developerguide/db-instance-classes.html#db-instance-class-specs for details."
+  type        = string
 }
 
 variable "docdb_primary_instances" {
-  type = number
+  description = "The number of instances in the primary MongoDB server cluster."
+  type        = number
 }
