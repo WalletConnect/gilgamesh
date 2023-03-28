@@ -5,13 +5,13 @@ locals {
 
 # Log Group for our App
 resource "aws_cloudwatch_log_group" "cluster_logs" {
-  name              = "${var.app_name}_logs"
+  name              = "${module.this.id}_logs"
   retention_in_days = 14
 }
 
 # ECS Cluster
 resource "aws_ecs_cluster" "app_cluster" {
-  name = var.app_name
+  name = module.this.id
 
   configuration {
     execute_command_configuration {
@@ -27,7 +27,7 @@ resource "aws_ecs_cluster" "app_cluster" {
 
 ## Task Definition
 resource "aws_ecs_task_definition" "app_task_definition" {
-  family = var.app_name
+  family = module.this.id
   cpu    = var.cpu
   memory = var.memory
   requires_compatibilities = [
@@ -38,7 +38,7 @@ resource "aws_ecs_task_definition" "app_task_definition" {
   task_role_arn      = aws_iam_role.ecs_task_execution_role.arn
   container_definitions = jsonencode([
     {
-      name  = var.app_name,
+      name  = module.this.id,
       image = var.image,
       cpu   = var.cpu - 128, # Remove sidecar memory/cpu so rest is assigned to primary container
       ulimits = [{
@@ -60,11 +60,11 @@ resource "aws_ecs_task_definition" "app_task_definition" {
       ],
       environment = [
         { name = "PORT", value = "8080" },
+        { name = "PUBLIC_URL", value = "http://localhost:8080" }, // TODO: Change this to the actual public URL
         { name = "LOG_LEVEL", value = "INFO" },
-        { name = "TELEMETRY_ENABLED", value = "true" },
-        { name = "TELEMETRY_GRPC_URL", value = "http://localhost:4317" },
-        { name = "TELEMETRY_PROMETHEUS_PORT", value = "8081" },
-        { name = "MONGO_ADDRESS", value = var.mongo_address }
+        { name = "MONGO_ADDRESS", value = var.docdb-connection_url },
+        { name = "CORS_ALLOWED_ORIGINS", value = "*" },
+        { name = "TELEMETRY_PROMETHEUS_PORT", value = "8081" }
       ],
       dependsOn = [
         { containerName = "aws-otel-collector", condition = "START" }
@@ -73,7 +73,7 @@ resource "aws_ecs_task_definition" "app_task_definition" {
         logDriver = "awslogs",
         options = {
           awslogs-group         = aws_cloudwatch_log_group.cluster_logs.name,
-          awslogs-region        = var.region,
+          awslogs-region        = var.log_region,
           awslogs-stream-prefix = "ecs"
         }
       }
@@ -96,8 +96,8 @@ resource "aws_ecs_task_definition" "app_task_definition" {
         logDriver = "awslogs",
         options = {
           awslogs-create-group  = "True",
-          awslogs-group         = "/ecs/${var.app_name}-ecs-aws-otel-sidecar-collector",
-          awslogs-region        = var.region,
+          awslogs-group         = "/ecs/${module.this.id}-ecs-aws-otel-sidecar-collector",
+          awslogs-region        = var.log_region,
           awslogs-stream-prefix = "ecs"
         }
       }
@@ -111,7 +111,7 @@ resource "aws_ecs_task_definition" "app_task_definition" {
 
 ## Service
 resource "aws_ecs_service" "app_service" {
-  name            = "${var.app_name}-service"
+  name            = "${module.this.id}-service"
   cluster         = aws_ecs_cluster.app_cluster.id
   task_definition = aws_ecs_task_definition.app_task_definition.arn
   launch_type     = "FARGATE"
@@ -133,24 +133,22 @@ resource "aws_ecs_service" "app_service" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.target_group.arn # Referencing our target group
-    container_name   = var.app_name
+    container_name   = module.this.id
     container_port   = 8080 # Specifying the container port
   }
 }
 
 # Load Balancers & Networking
 resource "aws_lb" "application_load_balancer" {
-  name               = "${var.app_name}-load-balancer"
+  name               = module.this.id
   load_balancer_type = "application"
   subnets            = var.public_subnets
 
   security_groups = [aws_security_group.lb_ingress.id]
 }
 
-
-
 resource "aws_lb_target_group" "target_group" {
-  name        = "${var.app_name}-target-group"
+  name        = module.this.id
   port        = 8080
   protocol    = "HTTP"
   target_type = "ip"
@@ -202,8 +200,8 @@ resource "aws_lb_listener" "listener-http" {
 
 # DNS Records
 resource "aws_route53_record" "dns_load_balancer" {
-  zone_id = var.route53_zone_id
-  name    = var.fqdn
+  zone_id = var.route53-zone_id
+  name    = var.route53-fqdn
   type    = "A"
 
   alias {
@@ -215,7 +213,7 @@ resource "aws_route53_record" "dns_load_balancer" {
 
 # IAM
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name               = "${var.app_name}-ecs-task-execution-role"
+  name               = "${module.this.id}-ecs-task-execution-role"
   assume_role_policy = data.aws_iam_policy_document.assume_role_policy.json
 }
 
@@ -276,7 +274,7 @@ data "aws_iam_policy_document" "otel" {
   }
 }
 resource "aws_iam_policy" "otel" {
-  name   = "${var.app_name}-otel"
+  name   = "${module.this.id}-otel"
   path   = "/"
   policy = data.aws_iam_policy_document.otel.json
 }
@@ -287,7 +285,7 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_fetch_ghcr_secret_
 
 # Security Groups
 resource "aws_security_group" "app_ingress" {
-  name        = "${var.app_name}-ingress-to-app"
+  name        = "${module.this.id}-ingress-to-app"
   description = "Allow app port ingress"
   vpc_id      = var.vpc_id
 
@@ -302,7 +300,7 @@ resource "aws_security_group" "app_ingress" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = [var.vpc_cidr]
+    cidr_blocks = [var.allowed_app_ingress_cidr_blocks]
   }
 
   egress {
@@ -318,7 +316,7 @@ resource "aws_security_group" "app_ingress" {
 }
 
 resource "aws_security_group" "lb_ingress" {
-  name        = "${var.app_name}-lb-ingress"
+  name        = "${module.this.id}-lb-ingress"
   description = "Allow app port ingress from vpc"
   vpc_id      = var.vpc_id
 
@@ -337,10 +335,10 @@ resource "aws_security_group" "lb_ingress" {
   }
 
   egress {
-    from_port   = 0              # Allowing any incoming port
-    to_port     = 0              # Allowing any outgoing port
-    protocol    = "-1"           # Allowing any outgoing protocol
-    cidr_blocks = [var.vpc_cidr] # Allowing traffic out to all VPC IP addresses
+    from_port   = 0                                    # Allowing any incoming port
+    to_port     = 0                                    # Allowing any outgoing port
+    protocol    = "-1"                                 # Allowing any outgoing protocol
+    cidr_blocks = [var.allowed_lb_ingress_cidr_blocks] # Allowing traffic out to all VPC IP addresses
   }
 
   lifecycle {

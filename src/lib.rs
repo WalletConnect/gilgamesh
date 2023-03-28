@@ -1,129 +1,149 @@
-pub mod config;
-pub mod error;
-mod handlers;
-mod state;
-pub mod stores;
-
 use {
     crate::{
-        config::Configuration,
-        state::{AppState, Metrics},
-        stores::messages::{MessagesPersistentStorageArc, MongoPersistentStorage},
+        log::prelude::*,
+        state::{MessagesStorageArc, RegistrationStorageArc},
     },
     axum::{
+        http::{HeaderValue, Method},
         routing::{get, post},
         Router,
     },
-    opentelemetry::{
-        sdk::{
-            metrics::selectors,
-            trace::{self, IdGenerator, Sampler},
-            Resource,
-        },
-        util::tokio_interval_stream,
-        KeyValue,
-    },
-    opentelemetry_otlp::{Protocol, WithExportConfig},
-    std::{net::SocketAddr, sync::Arc, time::Duration},
+    config::Configuration,
+    opentelemetry::{sdk::Resource, KeyValue},
+    state::AppState,
+    std::{net::SocketAddr, sync::Arc},
+    store::mongo::MongoStore,
     tokio::{select, sync::broadcast},
     tower::ServiceBuilder,
-    tracing::info,
-    tracing_subscriber::fmt::format::FmtSpan,
+    tower_http::{
+        cors::{AllowOrigin, CorsLayer},
+        trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
+    },
+    tracing::Level,
 };
 
-build_info::build_info!(fn build_info);
+pub mod auth;
+pub mod config;
+pub mod error;
+pub mod handlers;
+pub mod log;
+pub mod macros;
+pub mod metrics;
+pub mod relay;
+pub mod state;
+pub mod store;
+pub mod tags;
 
-pub type Result<T> = std::result::Result<T, error::Error>;
+#[derive(Default)]
+pub struct Options {
+    pub messages_store: Option<MessagesStorageArc>,
+    pub registration_store: Option<RegistrationStorageArc>,
+}
 
-pub async fn bootstap(mut shutdown: broadcast::Receiver<()>, config: Configuration) -> Result<()> {
-    let persitent_storage: MessagesPersistentStorageArc =
-        Arc::new(MongoPersistentStorage::new(&config).await?);
-    let mut state = AppState::new(config.clone(), persitent_storage)?;
+pub async fn bootstrap(
+    mut shutdown: broadcast::Receiver<()>,
+    config: Configuration,
+    options: Options,
+) -> error::Result<()> {
+    // Check config is valid and then throw the error if its not
+    config.is_valid()?;
 
-    // Telemetry
-    if state.config.telemetry_enabled.unwrap_or(false) {
-        let grpc_url = state
-            .config
-            .telemetry_grpc_url
-            .clone()
-            .unwrap_or_else(|| "http://localhost:4317".to_string());
+    let (messages_store, registration_store) =
+        match (options.messages_store, options.registration_store) {
+            (Some(messages_store), Some(registration_store)) => {
+                (messages_store, registration_store)
+            }
+            (Some(messages_store), None) => {
+                let store = Arc::new(MongoStore::new(&config).await?);
+                (messages_store, store as RegistrationStorageArc)
+            }
+            (None, Some(registration_store)) => {
+                let store = Arc::new(MongoStore::new(&config).await?);
+                (store as MessagesStorageArc, registration_store)
+            }
+            _ => {
+                let store = Arc::new(MongoStore::new(&config).await?);
+                (
+                    store.clone() as MessagesStorageArc,
+                    store as RegistrationStorageArc,
+                )
+            }
+        };
 
-        let tracing_exporter = opentelemetry_otlp::new_exporter()
-            .tonic()
-            .with_endpoint(grpc_url.clone())
-            .with_timeout(Duration::from_secs(5))
-            .with_protocol(Protocol::Grpc);
+    let mut state = AppState::new(config.clone(), messages_store, registration_store)?;
 
-        let tracer = opentelemetry_otlp::new_pipeline()
-            .tracing()
-            .with_exporter(tracing_exporter)
-            .with_trace_config(
-                trace::config()
-                    .with_sampler(Sampler::AlwaysOn)
-                    .with_id_generator(IdGenerator::default())
-                    .with_max_events_per_span(64)
-                    .with_max_attributes_per_span(16)
-                    .with_max_events_per_span(16)
-                    .with_resource(Resource::new(vec![
-                        KeyValue::new("service.name", state.build_info.crate_info.name.clone()),
-                        KeyValue::new(
-                            "service.version",
-                            state.build_info.crate_info.version.clone().to_string(),
-                        ),
-                    ])),
-            )
-            .install_batch(opentelemetry::runtime::Tokio)?;
+    if config.validate_signatures {
+        // Fetch public key so it's cached for the first 6hrs
+        let public_key = state.relay_client.public_key().await;
+        if public_key.is_err() {
+            warn!("Failed initial fetch of Relay's Public Key, this may prevent items validation.")
+        }
+    }
 
-        let metrics_exporter = opentelemetry_otlp::new_exporter()
-            .tonic()
-            .with_endpoint(grpc_url)
-            .with_timeout(Duration::from_secs(5))
-            .with_protocol(Protocol::Grpc);
-
-        let meter_provider = opentelemetry_otlp::new_pipeline()
-            .metrics(tokio::spawn, tokio_interval_stream)
-            .with_exporter(metrics_exporter)
-            .with_period(Duration::from_secs(3))
-            .with_timeout(Duration::from_secs(10))
-            .with_aggregator_selector(selectors::simple::Selector::Exact)
-            .build()?;
-
-        opentelemetry::global::set_meter_provider(meter_provider.provider());
-
-        let meter = opentelemetry::global::meter("gilgamesh");
-        let example_counter = meter
-            .i64_up_down_counter("example")
-            .with_description("This is an example counter")
-            .init();
-
-        state.set_telemetry(tracer, Metrics {
-            example: example_counter,
-        })
-    } else if !state.config.is_test {
-        // Only log to console if telemetry disabled
-        tracing_subscriber::fmt()
-            .with_max_level(state.config.log_level())
-            .with_span_events(FmtSpan::CLOSE)
-            .init();
+    if state.config.telemetry_prometheus_port.is_some() {
+        state.set_metrics(metrics::Metrics::new(Resource::new(vec![
+            KeyValue::new("service_name", "echo-server"),
+            KeyValue::new(
+                "service_version",
+                state.build_info.crate_info.version.clone().to_string(),
+            ),
+        ]))?);
     }
 
     let port = state.config.port;
+    let private_port = state.config.telemetry_prometheus_port.unwrap_or(3001);
+
+    let allowed_origins = state.config.cors_allowed_origins.clone();
 
     let state_arc = Arc::new(state);
 
-    let global_middleware = ServiceBuilder::new();
+    let global_middleware = ServiceBuilder::new()
+        .layer(
+            TraceLayer::new_for_http()
+                .make_span_with(DefaultMakeSpan::new().include_headers(true))
+                .on_request(DefaultOnRequest::new().level(Level::INFO))
+                .on_response(
+                    DefaultOnResponse::new()
+                        .level(Level::INFO)
+                        .include_headers(true),
+                ),
+        )
+        .layer(if allowed_origins == vec!["*".to_string()] {
+            info!("CORS is disabled");
+            CorsLayer::new()
+                .allow_methods([Method::GET, Method::POST, Method::DELETE])
+                .allow_origin(AllowOrigin::any())
+        } else {
+            info!("CORS is enabled for {:?}", allowed_origins);
+            CorsLayer::new()
+                .allow_methods([Method::GET, Method::POST, Method::DELETE])
+                .allow_origin(
+                    allowed_origins
+                        .iter()
+                        .map(|v| v.parse::<HeaderValue>().unwrap())
+                        .collect::<Vec<HeaderValue>>(),
+                )
+        });
 
     let app = Router::new()
         .route("/health", get(handlers::health::handler))
-        .route("/messages", get(handlers::messages::get))
-        .route("/messages", post(handlers::messages::post))
+        .route("/messages", get(handlers::get_messages::handler))
+        .route("/messages", post(handlers::save_message::handler))
+        .route("/register", get(handlers::get_registration::handler))
+        .route("/register", post(handlers::register::handler))
         .layer(global_middleware)
+        .with_state(state_arc.clone());
+
+    let private_app = Router::new()
+        .route("/metrics", get(handlers::metrics::handler))
         .with_state(state_arc);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
+    let private_addr = SocketAddr::from(([0, 0, 0, 0], private_port));
 
     select! {
         _ = axum::Server::bind(&addr).serve(app.into_make_service()) => info!("Server terminating"),
+        _ = axum::Server::bind(&private_addr).serve(private_app.into_make_service()) => info!("Internal Server terminating"),
         _ = shutdown.recv() => info!("Shutdown signal received, killing servers"),
     }
 

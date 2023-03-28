@@ -1,6 +1,5 @@
 locals {
-  app_name            = "history"
-  fqdn                = terraform.workspace == "prod" ? var.public_url : "${terraform.workspace}.${var.public_url}"
+  fqdn                = module.this.stage == "prod" ? var.public_url : "${terraform.workspace}.${var.public_url}"
   latest_release_name = data.github_release.latest_release.name
   version             = coalesce(var.image_version, substr(local.latest_release_name, 1, length(local.latest_release_name)))
 }
@@ -11,12 +10,13 @@ data "github_release" "latest_release" {
   retrieve_by = "latest"
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Networking
+################################################################################
+# Networking
 
+#tflint-ignore: terraform_module_version
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
-  name   = "${terraform.workspace}-${local.app_name}"
+  name   = "${module.this.stage}-${module.this.name}"
 
   cidr = "10.0.0.0/16"
 
@@ -39,22 +39,22 @@ module "vpc" {
 }
 
 module "dns" {
-  source = "github.com/WalletConnect/terraform-modules.git//modules/dns"
+  source  = "app.terraform.io/wallet-connect/dns/aws"
+  version = "0.1.0"
 
-  hosted_zone_name = var.public_url
   fqdn             = local.fqdn
+  hosted_zone_name = var.public_url
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Data Stores
+################################################################################
+# Data Stores
 
-module "keystore-docdb" {
-  source = "./docdb"
+module "history_docdb" {
+  source     = "./docdb"
+  context    = module.this.context
+  attributes = ["history-db"]
 
-  app_name                    = local.app_name
-  mongo_name                  = "keystore-docdb"
-  environment                 = terraform.workspace
-  default_database            = "keystore"
+  default_database            = "history"
   primary_instance_class      = var.docdb_primary_instance_class
   primary_instances           = var.docdb_primary_instances
   vpc_id                      = module.vpc.vpc_id
@@ -64,43 +64,44 @@ module "keystore-docdb" {
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-// Application
+################################################################################
+# Application
 
 data "aws_ecr_repository" "repository" {
   name = "gilgamesh"
 }
 
 module "ecs" {
-  source = "./ecs"
+  source  = "./ecs"
+  context = module.this.context
 
-  app_name            = "${terraform.workspace}-${local.app_name}"
-  prometheus_endpoint = aws_prometheus_workspace.prometheus.prometheus_endpoint
-  image               = "${data.aws_ecr_repository.repository.repository_url}:${local.version}"
-  acm_certificate_arn = module.dns.certificate_arn
-  cpu                 = 512
-  fqdn                = local.fqdn
-  memory              = 1024
-  private_subnets     = module.vpc.private_subnets
-  public_subnets      = module.vpc.public_subnets
-  region              = var.region
-  route53_zone_id     = module.dns.zone_id
-  vpc_cidr            = module.vpc.vpc_cidr_block
-  vpc_id              = module.vpc.vpc_id
-  mongo_address       = module.keystore-docdb.connection_url
+  prometheus_endpoint             = aws_prometheus_workspace.prometheus.prometheus_endpoint
+  image                           = "${data.aws_ecr_repository.repository.repository_url}:${local.version}"
+  acm_certificate_arn             = module.dns.certificate_arn
+  cpu                             = 512
+  route53-fqdn                    = local.fqdn
+  memory                          = 1024
+  private_subnets                 = module.vpc.private_subnets
+  public_subnets                  = module.vpc.public_subnets
+  log_region                      = var.region
+  route53-zone_id                 = module.dns.zone_id
+  vpc_id                          = module.vpc.vpc_id
+  allowed_app_ingress_cidr_blocks = module.vpc.vpc_cidr_block
+  allowed_lb_ingress_cidr_blocks  = module.vpc.vpc_cidr_block
+  docdb-connection_url            = module.history_docdb.connection_url
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Monitoring
+################################################################################
+# Monitoring
 
 resource "aws_prometheus_workspace" "prometheus" {
-  alias = "prometheus-${terraform.workspace}-${local.app_name}"
+  alias = "prometheus-${module.this.id}"
 }
 
 module "o11y" {
-  source = "./monitoring"
+  source  = "./monitoring"
+  context = module.this.context
 
   environment             = terraform.workspace
-  app_name                = local.app_name
   prometheus_workspace_id = aws_prometheus_workspace.prometheus.id
 }

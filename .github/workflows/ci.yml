@@ -1,6 +1,8 @@
 name: ci
 
 on:
+  workflow_dispatch:
+
   pull_request:
     paths-ignore:
       - "spec/**"
@@ -27,7 +29,7 @@ concurrency:
 
 jobs:
   tasks:
-    name: "[${{ matrix.os }}/rust-${{matrix.rust}}] ${{ matrix.cargo.name }}"
+    name: "${{ matrix.cargo.name }} [${{ matrix.os }}/rust-${{matrix.rust}}]"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -37,44 +39,44 @@ jobs:
         rust:
           - nightly
         cargo:
-          # - name: "Clippy"
-          #   cmd: clippy
-          #   args: -- -D clippy::all
-          #   cache: {}
+          - name: "Clippy"
+            cmd: clippy
+            args: --all-features --tests -- -D clippy::all -W clippy::style
+            cache: {}
           - name: "Formatting"
             cmd: fmt
             args: -- --check
             cache: {}
           - name: "Unit Tests"
             cmd: test
-            args: --all-features
+            args: --features ci-tests
             cache: { sharedKey: "tests" }
+          - name: "Documentation Tests"
+            cmd: test
+            args: --doc
+            rust: stable
+            cache: {}
         include:
-          - os: ubuntu-latest
-            sccache-path: /home/runner/.cache/sccache
+          - sccache-path: /home/runner/.cache/sccache
     env:
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
       SCCACHE_CACHE_SIZE: 1G
       SCCACHE_DIR: ${{ matrix.sccache-path }}
     steps:
-      # Checkout code
       - name: "Git checkout"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      # Install sccache
       - name: "Install sccache"
-        if: matrix.os == 'ubuntu-latest'
         env:
           SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
-          SCCACHE_VERSION: v0.2.15
+          SCCACHE_VERSION: v0.4.0
         run: |
           SCCACHE_FILE=sccache-$SCCACHE_VERSION-x86_64-unknown-linux-musl
           curl -sSL "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
           install -vDm 755 "$SCCACHE_FILE/sccache" "$HOME/.local/bin/sccache"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      # Install Rust toolchain
       - name: "Install Rust ${{ matrix.rust }}"
         uses: actions-rs/toolchain@v1
         with:
@@ -85,7 +87,7 @@ jobs:
 
       # Rebuild cache
       - name: Cache cargo registry
-        uses: Swatinem/rust-cache@3bb3a9a087029c7bc392586cdc88cb6f66b9c6ef
+        uses: Swatinem/rust-cache@v2
         with: ${{ matrix.cargo.cache }}
         continue-on-error: false
 
@@ -98,7 +100,73 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-sccache-
 
+      - name: "Start sccache server"
+        run: |
+          sccache --stop-server || true
+          sccache --start-server
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
+
       # Run job
+      - name: "Task ${{ matrix.cargo.name }}"
+        uses: actions-rs/cargo@v1
+        with:
+          command: ${{ matrix.cargo.cmd }}
+          args: ${{ matrix.cargo.args }}
+
+      - name: "Print sccache stats"
+        run: sccache --show-stats
+
+      - name: "Stop sccache server"
+        run: sccache --stop-server || true
+
+  integration:
+    name: "Integration Tests"
+    runs-on: ubuntu-latest
+    env:
+      RUST_BACKTRACE: full
+      RUSTC_WRAPPER: sccache
+      SCCACHE_CACHE_SIZE: 1G
+      SCCACHE_DIR: /home/runner/.cache/sccache
+    steps:
+      - name: "Git checkout"
+        uses: actions/checkout@v3
+
+      - name: "Install sccache"
+        env:
+          SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
+          SCCACHE_VERSION: v0.4.0
+        run: |
+          SCCACHE_FILE=sccache-$SCCACHE_VERSION-x86_64-unknown-linux-musl
+          curl -sSL "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
+          install -vDm 755 "$SCCACHE_FILE/sccache" "$HOME/.local/bin/sccache"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: "Install Rust nightly"
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          profile: minimal
+          override: true
+          components: rustfmt, clippy
+
+      # Rebuild cache
+      - name: Cache cargo registry
+        uses: Swatinem/rust-cache@v2
+        with:
+          sharedKey: "tests"
+        continue-on-error: false
+
+      - name: Cache sccache
+        uses: actions/cache@v2
+        continue-on-error: false
+        with:
+          path: /home/runner/.cache/sccache
+          key: ${{ runner.os }}-sccache-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-sccache-
+
       - name: "Start sccache server"
         run: |
           sccache --stop-server || true
@@ -110,13 +178,17 @@ jobs:
           mongodb-version: '4.4'
           mongodb-db: gilgamesh
 
-      - name: "Task ${{ matrix.cargo.name }}"
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
+
+      # Run job
+      - name: "Storage Tests"
         uses: actions-rs/cargo@v1
         env:
           MONGO_ADDRESS: mongodb://localhost:27017/gilgamesh
         with:
-          command: ${{ matrix.cargo.cmd }}
-          args: ${{ matrix.cargo.args }}
+          command: test
+          args: --features storage-tests
 
       - name: "Print sccache stats"
         run: sccache --show-stats
@@ -124,8 +196,9 @@ jobs:
       - name: "Stop sccache server"
         run: sccache --stop-server || true
 
+
   kick-off-release:
-    needs: [tasks]
+    needs: [tasks, integration]
     if: github.event_name != 'pull_request'
     uses: ./.github/workflows/release.yml
     secrets: inherit

@@ -1,5 +1,5 @@
 locals {
-  name_prefix     = replace("${var.environment}-${var.app_name}-${var.mongo_name}", "_", "-")
+  name_prefix     = replace(module.this.id_full, "_", "-")
   master_password = aws_secretsmanager_secret_version.master_password.secret_string
 }
 
@@ -23,10 +23,10 @@ resource "aws_kms_key" "docdb_encryption" {
 }
 
 resource "aws_docdb_cluster" "docdb_primary" {
-  cluster_identifier              = "${local.name_prefix}-primary-cluster"
+  cluster_identifier              = "${local.name_prefix}-primary"
   master_username                 = "gilgamesh"
   master_password                 = local.master_password
-  port                            = 27017
+  port                            = var.port
   db_subnet_group_name            = aws_docdb_subnet_group.private_subnets.name
   storage_encrypted               = true
   kms_key_id                      = aws_kms_key.docdb_encryption.arn
@@ -59,8 +59,8 @@ resource "aws_security_group" "service_security_group" {
 
   ingress {
     description = "Allow inbound traffic to the DocDB cluster"
-    from_port   = 27017
-    to_port     = 27017
+    from_port   = var.port
+    to_port     = var.port
     protocol    = "TCP"
     cidr_blocks = var.allowed_ingress_cidr_blocks
   }
