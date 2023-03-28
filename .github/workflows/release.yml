@@ -55,6 +55,9 @@ jobs:
       - name: Cache cargo registry
         uses: Swatinem/rust-cache@v2
 
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
+
       - name: "Generate Changelog"
         run: cog changelog --at ${{ steps.release.outputs.version }} -t full_hash > GITHUB_CHANGELOG.md
 
