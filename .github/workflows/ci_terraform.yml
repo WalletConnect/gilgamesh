@@ -85,7 +85,7 @@ jobs:
       pull-requests: 'write'
     environment:
       name: infra/staging
-      url: https://staging.gilgamesh.walletconnect.com/health
+      url: https://staging.history.walletconnect.com/health
 
     steps:
       - name: Checkout
@@ -150,7 +150,7 @@ jobs:
       pull-requests: 'write'
     environment:
       name: infra/prod
-      url: https://gilgamesh.walletconnect.com/health
+      url: https://history.walletconnect.com/health
 
     steps:
       - name: Checkout

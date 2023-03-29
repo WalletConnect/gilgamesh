@@ -16,7 +16,7 @@ on:
         description: 'the URL of the environment'
         required: true
         type: string
-        default: https://gilgamesh.walletconnect.com/health
+        default: https://history.walletconnect.com/health
   workflow_call:
     inputs:
       environment:
@@ -28,7 +28,7 @@ on:
         description: 'the URL of the environment'
         required: true
         type: string
-        default: https://gilgamesh.walletconnect.com/health
+        default: https://history.walletconnect.com/health
       version:
         description: 'the release version'
         required: true
