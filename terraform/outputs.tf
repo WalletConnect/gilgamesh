@@ -7,7 +7,3 @@ output version {
   description: "The version of the deployed instance"
   value = local.version
 }
-
-output "" {
-  value = ""
-}
