@@ -50,7 +50,7 @@ jobs:
     with:
       version: ${{ needs.get-version.outputs.version }}
       environment: 'staging'
-      environment_url: https://staging.gilgamesh.walletconnect.com/health
+      environment_url: https://staging.history.walletconnect.com/health
 
   validate-staging:
     needs:
@@ -68,7 +68,7 @@ jobs:
     with:
       version: ${{ needs.get-version.outputs.version }}
       environment: 'prod'
-      environment_url: https://gilgamesh.walletconnect.com/health
+      environment_url: https://history.walletconnect.com/health
 
   validate-prod:
     needs:
