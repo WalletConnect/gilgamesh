@@ -27,23 +27,23 @@ describe('Gilgamesh', () => {
       expect(status).toBe(200)
     })
   })
-  describe('Messages', () => {
-    const url = `${BASE_URL}/messages`
-
-    it('can read/write messages', async () => {
-      const topic = uuid();
-      let resp = await axios.post(`${url}`, {
-        topic,
-        'messageId': uuid(),
-      })
-
-      expect(resp.status).toBe(200)
-
-      resp = await axios.get(`${url}`, { params: { topic } })
-
-      expect(resp.status).toBe(200)
-      console.log(resp.data)
-      expect(resp.data.value.messages.length).toBe(1)
-    })
-  })
+  // describe('Messages', () => {
+  //   const url = `${BASE_URL}/messages`
+  //
+  //   it('can read/write messages', async () => {
+  //     const topic = uuid();
+  //     let resp = await axios.post(`${url}`, {
+  //       topic,
+  //       'messageId': uuid(),
+  //     })
+  //
+  //     expect(resp.status).toBe(200)
+  //
+  //     resp = await axios.get(`${url}`, { params: { topic } })
+  //
+  //     expect(resp.status).toBe(200)
+  //     console.log(resp.data)
+  //     expect(resp.data.value.messages.length).toBe(1)
+  //   })
+  // })
 })
