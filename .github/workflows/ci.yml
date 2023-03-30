@@ -197,7 +197,7 @@ jobs:
         run: sccache --stop-server || true
 
 
-  kick-off-release:
+  release:
     needs: [tasks, integration]
     if: github.event_name != 'pull_request'
     uses: ./.github/workflows/release.yml
