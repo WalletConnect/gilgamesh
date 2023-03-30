@@ -6,6 +6,7 @@ authors = [
     "Derek <derek@walletconnect.com>",
     "Xav <xav@walletconnect.com>"
 ]
+license = "Apache-2.0"
 build = "build.rs"
 
 [dependencies]
