@@ -9,12 +9,14 @@ Configure the Grafana dashboards for the application
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.0 |
 | <a name="requirement_grafana"></a> [grafana](#requirement\_grafana) | ~> 1.24 |
+| <a name="requirement_jsonnet"></a> [jsonnet](#requirement\_jsonnet) | ~> 2.2.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_grafana"></a> [grafana](#provider\_grafana) | ~> 1.24 |
+| <a name="provider_jsonnet"></a> [jsonnet](#provider\_jsonnet) | ~> 2.2.0 |
 
 ## Modules
 
@@ -29,6 +31,7 @@ Configure the Grafana dashboards for the application
 | [grafana_dashboard.at_a_glance](https://registry.terraform.io/providers/grafana/grafana/latest/docs/resources/dashboard) | resource |
 | [grafana_data_source.cloudwatch](https://registry.terraform.io/providers/grafana/grafana/latest/docs/resources/data_source) | resource |
 | [grafana_data_source.prometheus](https://registry.terraform.io/providers/grafana/grafana/latest/docs/resources/data_source) | resource |
+| [jsonnet_file.dashboard](https://registry.terraform.io/providers/alxrem/jsonnet/latest/docs/data-sources/file) | data source |
 
 ## Inputs
 
@@ -51,5 +54,8 @@ Configure the Grafana dashboards for the application
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_dashboard_definition"></a> [dashboard\_definition](#output\_dashboard\_definition) | The JSON definition of the dashboard. |
+| <a name="output_prometheus_url"></a> [prometheus\_url](#output\_prometheus\_url) | The URL of the Prometheus server to use for this dashboard. |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

@@ -100,10 +100,9 @@ resource "aws_prometheus_workspace" "prometheus" {
   alias = "prometheus-${module.this.id}"
 }
 
-module "o11y" {
+module "monitoring" {
   source  = "./monitoring"
   context = module.this.context
 
-  environment             = terraform.workspace
   prometheus_workspace_id = aws_prometheus_workspace.prometheus.id
 }
