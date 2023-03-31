@@ -11,8 +11,9 @@ data "jsonnet_file" "dashboard" {
   source = "${path.module}/dashboard.jsonnet"
 
   ext_str = {
-    dashboard_title = module.this.id
-    prometheus_uid  = grafana_data_source.prometheus.uid
+    name           = module.this.name
+    stage          = module.this.stage
+    prometheus_uid = grafana_data_source.prometheus.uid
   }
 }
 
