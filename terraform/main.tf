@@ -89,6 +89,8 @@ module "ecs" {
   allowed_app_ingress_cidr_blocks = module.vpc.vpc_cidr_block
   allowed_lb_ingress_cidr_blocks  = module.vpc.vpc_cidr_block
   docdb-connection_url            = module.history_docdb.connection_url
+
+  log_level = "DEBUG"
 }
 
 ################################################################################

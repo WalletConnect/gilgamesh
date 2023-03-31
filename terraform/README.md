@@ -51,5 +51,8 @@
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_fqdn"></a> [fqdn](#output\_fqdn) | The FQDN of the deployed instance |
+| <a name="output_version"></a> [version](#output\_version) | The version of the deployed instance |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
