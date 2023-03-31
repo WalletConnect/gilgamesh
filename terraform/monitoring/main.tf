@@ -35,14 +35,14 @@ data "jsonnet_file" "dashboard" {
 
   ext_str = {
     dashboard_title = module.this.id
-    prometheus_uid = grafana_data_source.prometheus.uid
+    prometheus_uid  = grafana_data_source.prometheus.uid
   }
 }
 
 # JSON Dashboard. When exporting from Grafana make sure that all
 # variables are replaced properly
 resource "grafana_dashboard" "at_a_glance" {
-  overwrite = true
-  message   = "Updated by Terraform"
+  overwrite   = true
+  message     = "Updated by Terraform"
   config_json = data.jsonnet_file.dashboard.rendered
 }

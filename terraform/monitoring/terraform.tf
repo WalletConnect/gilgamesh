@@ -7,7 +7,7 @@ terraform {
       version = "~> 1.24"
     }
     jsonnet = {
-      source = "alxrem/jsonnet"
+      source  = "alxrem/jsonnet"
       version = "~> 2.2.0"
     }
   }
