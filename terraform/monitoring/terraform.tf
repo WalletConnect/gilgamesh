@@ -6,5 +6,13 @@ terraform {
       source  = "grafana/grafana"
       version = "~> 1.24"
     }
+    jsonnet = {
+      source = "alxrem/jsonnet"
+      version = "~> 2.2.0"
+    }
   }
+}
+
+provider "jsonnet" {
+  jsonnet_path = "./lib/,./grafonnet"
 }
