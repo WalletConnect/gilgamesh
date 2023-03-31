@@ -3,6 +3,12 @@ variable "log_region" {
   type        = string
 }
 
+variable "log_level" {
+  description = "The log level to use for the application."
+  type        = string
+  default     = "INFO"
+}
+
 variable "image" {
   description = "The name of the ECR image to use for the container."
   type        = string

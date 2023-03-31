@@ -3,6 +3,7 @@ use {
         error,
         handlers::Response,
         increment_counter,
+        log::prelude::*,
         relay::signature::RequireValidSignature,
         state::{AppState, CachedRegistration},
         store::{registrations::Registration, StoreError},
@@ -28,6 +29,8 @@ pub async fn handler(
     StateExtractor(state): StateExtractor<Arc<AppState>>,
     RequireValidSignature(Json(payload)): RequireValidSignature<Json<HistoryPayload>>,
 ) -> error::Result<Response> {
+    debug!("Received `save_message` query: {:?}", payload);
+
     increment_counter!(state.metrics, received_items);
 
     let registration = if let Some(registration) = state
@@ -39,9 +42,11 @@ pub async fn handler(
             tags: r.tags,
             relay_url: r.relay_url,
         }) {
+        debug!("loaded registration from cache");
         increment_counter!(state.metrics, cached_registrations);
         registration
     } else {
+        debug!("loading registration from database");
         let registration = match state
             .registration_store
             .get_registration(payload.client_id.as_ref())
@@ -67,6 +72,7 @@ pub async fn handler(
     let tags = registration.tags;
     for tag in &tags {
         if match_tag(payload.tag, tag) {
+            debug!("tag matching, storing message");
             state
                 .messages_store
                 .upsert_message(
@@ -77,6 +83,8 @@ pub async fn handler(
                     payload.message.as_ref(),
                 )
                 .await?;
+
+            debug!("message stored, sending ack");
 
             increment_counter!(state.metrics, stored_items);
 
