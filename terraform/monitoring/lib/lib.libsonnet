@@ -1,3 +1,0 @@
-{
-  data: 'from library'
-}
