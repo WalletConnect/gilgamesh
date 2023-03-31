@@ -3,10 +3,8 @@ local lib = import 'lib.libsonnet';
 local grafana = import 'grafonnet/grafana.libsonnet';
 local dashboard = grafana.dashboard;
 local annotation = grafana.annotation;
-local row = grafana.row;
 local statPanel = grafana.statPanel;
 local prometheus = grafana.prometheus;
-local template = grafana.template;
 
 local ds_prometheus = {
     type: 'prometheus',
@@ -14,8 +12,8 @@ local ds_prometheus = {
 };
 
 dashboard.new(
-  title = std.extVar('dashboard_title'),
-  uid = std.extVar('dashboard_title'),
+  title = "%s - %s" % [std.extVar('stage'), std.extVar('name')],
+  uid = "%s_%s" % [std.extVar('stage'), std.extVar('name')],
   schemaVersion = 26,
   editable = true,
   graphTooltip = 'shared_crosshair',
