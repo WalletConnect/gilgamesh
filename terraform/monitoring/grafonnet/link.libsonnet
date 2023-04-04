@@ -10,13 +10,14 @@
    * @param icon (default: `'external link'`) Icon displayed with the link.
    * @param url (default: `''`) URL of the link
    * @param targetBlank (default: `false`) Whether the link will open in a new window.
-   * @param type (default: `'dashboards'`)
+   * @param type (default: `'dashboards'`) 'dashboards' or 'link'
    *
-   * @name link.dashboards
+   * @name link.new
    */
-  dashboards(
+  new(
     title,
     tags,
+    tooltip='',
     asDropdown=true,
     includeVars=false,
     keepTime=false,
@@ -32,6 +33,7 @@
       keepTime: keepTime,
       tags: tags,
       title: title,
+      tooltip: tooltip,
       type: type,
       url: url,
       targetBlank: targetBlank,

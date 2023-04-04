@@ -12,6 +12,7 @@
    * @param datasource (optional) Name of the Prometheus datasource. Leave by default otherwise.
    * @param interval (optional) Time span used to aggregate or group data points by time. By default Grafana uses an automatic interval calculated based on the width of the graph.
    * @param instant (optional) Perform an "instant" query, to return only the latest value that Prometheus has scraped for the requested time series. Instant queries return results much faster than normal range queries. Use them to look up label sets.
+   * @param exemplar (optional) Enable "exemplar" tracking.
    * @param hide (optional) Set to `true` to hide the target from the panel.
    *
    * @return A Prometheus target to be added to panels.
@@ -24,6 +25,7 @@
     datasource=null,
     interval=null,
     instant=null,
+    exemplar=null,
     hide=null,
   ):: {
     [if hide != null then 'hide']: hide,
@@ -34,5 +36,6 @@
     legendFormat: legendFormat,
     [if interval != null then 'interval']: interval,
     [if instant != null then 'instant']: instant,
+    [if exemplar != null then 'exemplar']: exemplar,
   },
 }
