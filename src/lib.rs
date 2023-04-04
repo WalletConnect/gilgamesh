@@ -19,7 +19,6 @@ use {
         cors::{AllowOrigin, CorsLayer},
         trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
     },
-    tracing::Level,
 };
 
 pub mod auth;
@@ -101,10 +100,10 @@ pub async fn bootstrap(
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().include_headers(true))
-                .on_request(DefaultOnRequest::new().level(Level::INFO))
+                .on_request(DefaultOnRequest::new().level(config.log_level()))
                 .on_response(
                     DefaultOnResponse::new()
-                        .level(Level::INFO)
+                        .level(config.log_level())
                         .include_headers(true),
                 ),
         )
