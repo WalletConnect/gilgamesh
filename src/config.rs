@@ -1,4 +1,4 @@
-use {super::error, serde::Deserialize};
+use {super::error, serde::Deserialize, std::str::FromStr};
 
 const DEFAULT_PORT_NUMBER: u16 = 3001;
 const DEFAULT_LOG_LEVEL: &str = "WARN";
@@ -38,6 +38,10 @@ impl Configuration {
     /// Validate the configuration.
     pub fn is_valid(&self) -> error::Result<()> {
         Ok(())
+    }
+
+    pub fn log_level(&self) -> tracing::Level {
+        tracing::Level::from_str(self.log_level.as_str()).unwrap_or(tracing::Level::INFO)
     }
 }
 

@@ -7,6 +7,7 @@ use {
             MissingTimestampHeader,
             ToBytesError,
         },
+        log::prelude::*,
         state::State,
     },
     async_trait::async_trait,
@@ -63,14 +64,20 @@ where
             .and_then(|header| header.to_str().ok());
 
         match (signature_header, timestamp_header) {
-            (Some(signature), Some(timestamp))
-                if signature_is_valid(signature, timestamp, &body, &public_key).await? =>
-            {
-                let req = Request::<B>::from_parts(parts, bytes.into());
-                Ok(T::from_request(req, state)
-                    .await
-                    .map(Self)
-                    .map_err(|_| FromRequestError)?)
+            (Some(signature), Some(timestamp)) => {
+                match signature_is_valid(signature, timestamp, &body, &public_key).await {
+                    Ok(_) => {
+                        let req = Request::<B>::from_parts(parts, bytes.into());
+                        Ok(T::from_request(req, state)
+                            .await
+                            .map(Self)
+                            .map_err(|_| FromRequestError)?)
+                    }
+                    Err(err) => {
+                        warn!("relay signature is not valid: {err:?}");
+                        Err(err)
+                    }
+                }
             }
             (Some(_), None) => Err(MissingTimestampHeader),
             (None, Some(_)) => Err(MissingSignatureHeader),

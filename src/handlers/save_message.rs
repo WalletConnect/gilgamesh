@@ -27,8 +27,7 @@ pub struct HistoryPayload {
 
 pub async fn handler(
     StateExtractor(state): StateExtractor<Arc<AppState>>,
-    // RequireValidSignature(Json(payload)): RequireValidSignature<Json<HistoryPayload>>,
-    Json(payload): Json<HistoryPayload>,
+    RequireValidSignature(Json(payload)): RequireValidSignature<Json<HistoryPayload>>,
 ) -> error::Result<Response> {
     debug!("Received `save_message` query: {:?}", payload);
 
