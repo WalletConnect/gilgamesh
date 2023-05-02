@@ -77,18 +77,10 @@ impl MessagesStore for MockMessageStore {
 
     async fn get_messages_after(
         &self,
-        client_id: &str,
         _topic: &str,
         _origin: Option<&str>,
         _message_count: usize,
     ) -> Result<StoreMessages, StoreError> {
-        if self.client_id.is_some() && self.client_id != Some(client_id.to_string()) {
-            return Err(StoreError::NotFound(
-                "messages".to_string(),
-                client_id.to_string(),
-            ));
-        }
-
         Ok(StoreMessages {
             messages: self.test_get_messages(),
             next_id: Some(Arc::from("after")),
@@ -97,18 +89,10 @@ impl MessagesStore for MockMessageStore {
 
     async fn get_messages_before(
         &self,
-        client_id: &str,
         _topic: &str,
         _origin: Option<&str>,
         _message_count: usize,
     ) -> Result<StoreMessages, StoreError> {
-        if self.client_id.is_some() && self.client_id != Some(client_id.to_string()) {
-            return Err(StoreError::NotFound(
-                "messages".to_string(),
-                client_id.to_string(),
-            ));
-        }
-
         Ok(StoreMessages {
             messages: self.test_get_messages(),
             next_id: Some(Arc::from("before")),

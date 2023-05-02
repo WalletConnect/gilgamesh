@@ -21,7 +21,7 @@ use {
     },
 };
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct MongoStore {
     db: Database,
 }
@@ -64,7 +64,6 @@ impl MongoStore {
 
     async fn get_messages(
         &self,
-        client_id: &str,
         topic: &str,
         origin: Option<&str>,
         message_count: usize,
@@ -73,13 +72,11 @@ impl MongoStore {
     ) -> Result<StoreMessages, StoreError> {
         let filter: Result<Document, StoreError> = match origin {
             None => Ok(doc! {
-                "client_id": &client_id,
                 "topic": &topic,
             }),
             Some(origin) => {
                 let ts = self.get_message_timestamp(topic, origin).await?;
                 Ok(doc! {
-                    "client_id": &client_id,
                     "topic": &topic,
                     "ts": { comparator: ts }
                 })
@@ -147,23 +144,21 @@ impl MessagesStore for MongoStore {
 
     async fn get_messages_after(
         &self,
-        client_id: &str,
         topic: &str,
         origin: Option<&str>,
         message_count: usize,
     ) -> Result<StoreMessages, StoreError> {
-        self.get_messages(client_id, topic, origin, message_count, "$gte", 1)
+        self.get_messages(topic, origin, message_count, "$gte", 1)
             .await
     }
 
     async fn get_messages_before(
         &self,
-        client_id: &str,
         topic: &str,
         origin: Option<&str>,
         message_count: usize,
     ) -> Result<StoreMessages, StoreError> {
-        self.get_messages(client_id, topic, origin, message_count, "$lte", -1)
+        self.get_messages(topic, origin, message_count, "$lte", -1)
             .await
     }
 }

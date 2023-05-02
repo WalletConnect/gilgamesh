@@ -2,7 +2,7 @@ use {
     super::StoreError,
     async_trait::async_trait,
     serde::{Deserialize, Serialize},
-    std::sync::Arc,
+    std::{fmt::Debug, sync::Arc},
     wither::{
         bson::{self, doc, oid::ObjectId},
         Model,
@@ -14,7 +14,7 @@ use {
     collection_name = "Messages",
     index(keys = r#"doc!{"ts": 1}"#),
     index(keys = r#"doc!{"ts": -1}"#),
-    index(keys = r#"doc!{"client_id": 1, "topic": 1}"#),
+    index(keys = r#"doc!{"topic": 1}"#),
     index(
         keys = r#"doc!{"client_id": 1, "topic": 1, "message_id": 1}"#,
         options = r#"doc!{"unique": true}"#
@@ -46,7 +46,7 @@ pub struct StoreMessages {
 }
 
 #[async_trait]
-pub trait MessagesStore: 'static + std::fmt::Debug + Send + Sync {
+pub trait MessagesStore: 'static + Send + Sync {
     async fn upsert_message(
         &self,
         method: &str,
@@ -57,14 +57,12 @@ pub trait MessagesStore: 'static + std::fmt::Debug + Send + Sync {
     ) -> Result<(), StoreError>;
     async fn get_messages_after(
         &self,
-        client_id: &str,
         topic: &str,
         origin: Option<&str>,
         message_count: usize,
     ) -> Result<StoreMessages, StoreError>;
     async fn get_messages_before(
         &self,
-        client_id: &str,
         topic: &str,
         origin: Option<&str>,
         message_count: usize,

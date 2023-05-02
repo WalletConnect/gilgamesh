@@ -1,6 +1,5 @@
 use {
     crate::{
-        auth::AuthBearer,
         error,
         increment_counter,
         increment_counter_with,
@@ -11,7 +10,6 @@ use {
         extract::{Query, State},
         Json,
     },
-    relay_rpc::auth::Jwt,
     serde::{Deserialize, Serialize},
     std::{cmp, sync::Arc},
 };
@@ -73,10 +71,8 @@ pub struct GetMessagesResponse {
 /// The handler for the get messages endpoint.
 pub async fn handler(
     State(state): State<Arc<AppState>>,
-    AuthBearer(token): AuthBearer,
     query: Query<GetMessagesBody>,
 ) -> Result<Json<GetMessagesResponse>, error::Error> {
-    let client_id = Jwt(token).decode(&state.auth_aud.clone())?;
     let direction = query.direction.unwrap_or(Direction::Forward);
 
     let StoreMessages { messages, next_id } = match (&query.origin_id, direction) {
@@ -84,7 +80,6 @@ pub async fn handler(
             state
                 .messages_store
                 .get_messages_after(
-                    client_id.value(),
                     query.topic.as_ref(),
                     origin_id.as_deref(),
                     query.message_count.limit(),
@@ -95,7 +90,6 @@ pub async fn handler(
             state
                 .messages_store
                 .get_messages_before(
-                    client_id.value(),
                     query.topic.as_ref(),
                     origin_id.as_deref(),
                     query.message_count.limit(),
