@@ -27,7 +27,7 @@ pub struct Registration {
 }
 
 #[async_trait]
-pub trait RegistrationStore: 'static + std::fmt::Debug + Send + Sync {
+pub trait RegistrationStore: 'static + Send + Sync {
     async fn upsert_registration(
         &self,
         client_id: &str,

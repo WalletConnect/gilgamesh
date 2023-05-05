@@ -26,7 +26,7 @@ impl<S, B, T> FromRequest<S, B> for RequireValidSignature<T>
 where
     // these bounds are required by
     // `async_trait`
-    B: Send + 'static + body::HttpBody + From<hyper::body::Bytes>,
+    B: Send + 'static + body::HttpBody + From<body::Bytes>,
     B::Data: Send,
     S: Send + Sync + State,
     T: FromRequest<S, B>,
@@ -82,7 +82,6 @@ where
             (Some(_), None) => Err(MissingTimestampHeader),
             (None, Some(_)) => Err(MissingSignatureHeader),
             (None, None) => Err(MissingAllSignatureHeader),
-            _ => Err(MissingAllSignatureHeader),
         }
     }
 }

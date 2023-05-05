@@ -21,7 +21,7 @@ async fn test_after_no_origin(ctx: &StoreContext) {
     let result = ctx
         .storage
         .store
-        .get_messages_after(TEST_CLIENT_ID, topic, None, TEST_QUERY_SIZE)
+        .get_messages_after(topic, None, TEST_QUERY_SIZE)
         .await
         .unwrap();
 
@@ -58,12 +58,7 @@ async fn test_after_origin(ctx: &StoreContext) {
     let result = ctx
         .storage
         .store
-        .get_messages_after(
-            TEST_CLIENT_ID,
-            topic,
-            Some(&origin.to_string()),
-            TEST_QUERY_SIZE,
-        )
+        .get_messages_after(topic, Some(&origin.to_string()), TEST_QUERY_SIZE)
         .await
         .unwrap();
 
@@ -104,12 +99,7 @@ async fn test_after_origin_overflow(ctx: &StoreContext) {
     let result = ctx
         .storage
         .store
-        .get_messages_after(
-            TEST_CLIENT_ID,
-            topic,
-            Some(&origin.to_string()),
-            TEST_QUERY_SIZE,
-        )
+        .get_messages_after(topic, Some(&origin.to_string()), TEST_QUERY_SIZE)
         .await
         .unwrap();
 
@@ -140,7 +130,7 @@ async fn test_before_no_origin(ctx: &StoreContext) {
     let result = ctx
         .storage
         .store
-        .get_messages_before(TEST_CLIENT_ID, topic, None, TEST_QUERY_SIZE)
+        .get_messages_before(topic, None, TEST_QUERY_SIZE)
         .await
         .unwrap();
 
@@ -177,12 +167,7 @@ async fn test_before_origin(ctx: &StoreContext) {
     let result = ctx
         .storage
         .store
-        .get_messages_before(
-            TEST_CLIENT_ID,
-            topic,
-            Some(&origin.to_string()),
-            TEST_QUERY_SIZE,
-        )
+        .get_messages_before(topic, Some(&origin.to_string()), TEST_QUERY_SIZE)
         .await
         .unwrap();
 
@@ -223,12 +208,7 @@ async fn test_before_origin_overflow(ctx: &StoreContext) {
     let result = ctx
         .storage
         .store
-        .get_messages_before(
-            TEST_CLIENT_ID,
-            topic,
-            Some(&origin.to_string()),
-            TEST_QUERY_SIZE,
-        )
+        .get_messages_before(topic, Some(&origin.to_string()), TEST_QUERY_SIZE)
         .await
         .unwrap();
 
@@ -267,7 +247,7 @@ async fn test_multi_topic(ctx: &StoreContext) {
         let result = ctx
             .storage
             .store
-            .get_messages_after(TEST_CLIENT_ID, topic.as_str(), None, QUERY_SIZE)
+            .get_messages_after(topic.as_str(), None, QUERY_SIZE)
             .await
             .unwrap();
 
@@ -309,12 +289,10 @@ async fn test_multi_clients(ctx: &StoreContext) {
     }
 
     for t in 0..NUM_CLIENTS {
-        let client_id = format!("{}-{}", TEST_CLIENT_ID, t + 1);
-
         let result = ctx
             .storage
             .store
-            .get_messages_after(client_id.as_str(), topic, None, QUERY_SIZE)
+            .get_messages_after(topic, None, QUERY_SIZE)
             .await
             .unwrap();
 
