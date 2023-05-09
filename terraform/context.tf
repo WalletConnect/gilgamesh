@@ -6,4 +6,8 @@ module "this" {
   environment = var.region
   stage       = terraform.workspace
   name        = "history"
+
+  tags = {
+    application = "history"
+  }
 }
