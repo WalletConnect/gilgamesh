@@ -66,6 +66,8 @@ jobs:
     steps:
       - name: "Git checkout"
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: "Install sccache"
         env:
@@ -132,6 +134,8 @@ jobs:
     steps:
       - name: "Git checkout"
         uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
       - name: "Install sccache"
         env:

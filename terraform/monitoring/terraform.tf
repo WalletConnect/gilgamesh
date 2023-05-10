@@ -14,5 +14,5 @@ terraform {
 }
 
 provider "jsonnet" {
-  jsonnet_path = "./grafonnet"
+  jsonnet_path = "./grafonnet-lib,./panels"
 }

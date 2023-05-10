@@ -7,15 +7,16 @@ data "jsonnet_file" "dashboard" {
   source = "${path.module}/dashboard.jsonnet"
 
   ext_str = {
-    name           = module.this.name
-    stage          = module.this.stage
+    dashboard_title = "${module.this.stage} - ${module.this.name}"
+    dashboard_uid   = "${module.this.stage}-${module.this.name}"
+
     prometheus_uid = grafana_data_source.prometheus.uid
   }
 }
 
 # JSON Dashboard. When exporting from Grafana make sure that all
 # variables are replaced properly
-resource "grafana_dashboard" "at_a_glance" {
+resource "grafana_dashboard" "main" {
   overwrite   = true
   message     = "Updated by Terraform"
   config_json = data.jsonnet_file.dashboard.rendered

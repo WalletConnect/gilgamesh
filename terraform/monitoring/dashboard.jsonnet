@@ -1,97 +1,48 @@
-local layout = import 'layout.libsonnet';
-local full_width = layout.full_width;
-local half_width = layout.half_width;
-local height    = 8;
+local grafana     = import 'grafonnet-lib/grafana.libsonnet';
+local panels      = import 'panels/panels.libsonnet';
 
-local grafana         = import 'grafonnet/grafana.libsonnet';
-local dashboard       = grafana.dashboard;
-local annotation      = grafana.annotation;
-local timeseriesPanel = grafana.timeseriesPanel;
-local prometheus      = grafana.prometheus;
+local dashboard   = grafana.dashboard;
 
-local ds_prometheus = {
-  type: 'prometheus',
-  uid: std.extVar('prometheus_uid'),
+local ds    = {
+  prometheus: {
+    type: 'prometheus',
+    uid:  std.extVar('prometheus_uid'),
+  },
+};
+local vars  = {
 };
 
+////////////////////////////////////////////////////////////////////////////////
+
+local height  = 8;
+local pos     = grafana.layout.pos(height);
+
+////////////////////////////////////////////////////////////////////////////////
+
 dashboard.new(
-  title = "%s - %s" % [std.extVar('stage'), std.extVar('name')],
-  uid = "%s_%s" % [std.extVar('stage'), std.extVar('name')],
-  schemaVersion = 35,
-  editable = true,
-  graphTooltip = 'shared_crosshair',
+  title         = std.extVar('dashboard_title'),
+  uid           = std.extVar('dashboard_uid'),
+  editable      = true,
+  graphTooltip  = dashboard.graphTooltips.sharedCrosshair,
 )
 .addAnnotation(
-  annotation.default {
-    iconColor: 'rgba(0, 211, 255, 1)',
-  }
+  grafana.annotation.new(
+    target = {
+      limit:    100,
+      matchAny: false,
+      tags:     [],
+      type:     'dashboard',
+    },
+  )
 )
 .addPanels(
-  layout.generate_grid([
-    timeseriesPanel.new(
-      title = 'Received Items per Hour',
-      datasource = ds_prometheus,
-    )
-    .addTarget(prometheus.target(
-      datasource = ds_prometheus,
-      expr = 'sum(rate(received_items{}[10m]))',
-      legendFormat = 'received items',
-      exemplar = true,
-    ))
-    { gridPos: { w: half_width, h: height } },
+  grafana.layout.generate_grid([
+    panels.received_items(ds, vars) { gridPos: pos._2 },
+    panels.stored_items(ds, vars)   { gridPos: pos._2 },
 
-    timeseriesPanel.new(
-      title = 'Stored Items per Hour',
-      datasource = ds_prometheus,
-    )
-    .addTarget(prometheus.target(
-      datasource = ds_prometheus,
-      expr = 'sum(rate(stored_items{}[10m]))',
-      legendFormat = 'stored items',
-      exemplar = true,
-    ))
-    { gridPos: { w: half_width, h: height } },
+    panels.get_queries(ds, vars)    { gridPos: pos._2 },
+    panels.served_items(ds, vars)   { gridPos: pos._2 },
 
-    timeseriesPanel.new(
-      title = 'Get Queries per Hour',
-      datasource = ds_prometheus,
-    )
-    .addTarget(prometheus.target(
-      datasource = ds_prometheus,
-      expr = 'sum(rate(get_queries{}[10m]))',
-      legendFormat = 'get queries',
-      exemplar = true,
-    ))
-    { gridPos: { w: half_width, h: height } },
-
-    timeseriesPanel.new(
-      title = 'Served Items per Hour',
-      datasource = ds_prometheus,
-    )
-    .addTarget(prometheus.target(
-      datasource = ds_prometheus,
-      expr = 'sum(rate(served_items{}[10m]))',
-      legendFormat = 'served items',
-      exemplar = true,
-    ))
-    { gridPos: { w: half_width, h: height } },
-
-    timeseriesPanel.new(
-      title = 'Registrations per Hour',
-      datasource = ds_prometheus,
-    )
-    .addTarget(prometheus.target(
-      datasource = ds_prometheus,
-      expr = 'sum(rate(cached_registrations{}[10m]))',
-      legendFormat = 'cached registrations',
-      exemplar = true,
-    ))
-    .addTarget(prometheus.target(
-      datasource = ds_prometheus,
-      expr = 'sum(rate(fetched_registrations{}[10m]))',
-      legendFormat = 'fetched registrations',
-      exemplar = true,
-    ))
-    { gridPos: { w: full_width, h: height } },
+    panels.registrations(ds, vars)  { gridPos: pos._1 },
   ])
 )
