@@ -8,6 +8,6 @@ module "this" {
   name        = "history"
 
   tags = {
-    application = "history"
+    Application = "history"
   }
 }
