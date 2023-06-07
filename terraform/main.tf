@@ -13,10 +13,11 @@ data "github_release" "latest_release" {
 ################################################################################
 # Networking
 
-#tflint-ignore: terraform_module_version
 module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
-  name   = "${module.this.stage}-${module.this.name}"
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "4.0"
+
+  name = "${module.this.stage}-${module.this.name}"
 
   cidr = "10.0.0.0/16"
 
@@ -103,4 +104,9 @@ module "monitoring" {
   context = module.this.context
 
   prometheus_workspace_id = aws_prometheus_workspace.prometheus.id
+
+  docdb_cluster_id  = module.history_docdb.cluster_id
+  ecs_service_name  = module.ecs.service_name
+  load_balancer_arn = module.ecs.load_balancer_arn
+  target_group_arn  = module.ecs.target_group_arn
 }

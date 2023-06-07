@@ -2,14 +2,28 @@ local grafana     = import 'grafonnet-lib/grafana.libsonnet';
 local panels      = import 'panels/panels.libsonnet';
 
 local dashboard   = grafana.dashboard;
+local row         = grafana.row;
+local layout      = grafana.layout;
 
 local ds    = {
+  cloudwatch: {
+    type: 'cloudwatch',
+    uid:  std.extVar('cloudwatch_uid'),
+  },
   prometheus: {
     type: 'prometheus',
     uid:  std.extVar('prometheus_uid'),
   },
 };
 local vars  = {
+  namespace:        'History',
+  environment:      std.extVar('environment'),
+  notifications:    std.parseJson(std.extVar('notifications')),
+
+  ecs_service_name: std.extVar('ecs_service_name'),
+  load_balancer:    std.extVar('load_balancer'),
+  target_group:     std.extVar('target_group'),
+  docdb_cluster_id: std.extVar('docdb_cluster_id'),
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,14 +49,28 @@ dashboard.new(
     },
   )
 )
-.addPanels(
-  grafana.layout.generate_grid([
-    panels.received_items(ds, vars) { gridPos: pos._2 },
-    panels.stored_items(ds, vars)   { gridPos: pos._2 },
 
-    panels.get_queries(ds, vars)    { gridPos: pos._2 },
-    panels.served_items(ds, vars)   { gridPos: pos._2 },
+.addPanels(layout.generate_grid([
+  row.new('Application'),
+    panels.app.cpu(ds, vars)                    { gridPos: pos._2 },
+    panels.app.memory(ds, vars)                 { gridPos: pos._2 },
 
-    panels.registrations(ds, vars)  { gridPos: pos._1 },
-  ])
-)
+  row.new('History'),
+    panels.history.received_items(ds, vars)     { gridPos: pos._2 },
+    panels.history.stored_items(ds, vars)       { gridPos: pos._2 },
+    panels.history.get_queries(ds, vars)        { gridPos: pos._2 },
+    panels.history.served_items(ds, vars)       { gridPos: pos._2 },
+    panels.history.registrations(ds, vars)      { gridPos: pos._1 },
+
+  row.new('Load Balancer'),
+    panels.lb.healthy_hosts(ds, vars)           { gridPos: pos._2 },
+
+  row.new('Database'),
+    panels.db.cpu(ds, vars)                     { gridPos: pos._3 },
+    panels.db.available_memory(ds, vars)        { gridPos: pos._3 },
+    panels.db.connections(ds, vars)             { gridPos: pos._3 },
+
+    panels.db.low_mem_op_throttled(ds, vars)    { gridPos: pos._3 },
+    panels.db.volume(ds, vars)                  { gridPos: pos._3 },
+    panels.db.buffer_cache_hit_ratio(ds, vars)  { gridPos: pos._3 },
+]))
