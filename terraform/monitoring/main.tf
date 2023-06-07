@@ -1,23 +1,14 @@
-#locals {
-#  opsgenie_notification_channel = "NNOynGwVz"
-#  notifications                 = (var.environment == "prod" ? [{ uid : local.opsgenie_notification_channel }] : [])
-#}
+locals {
+  opsgenie_notification_channel = "NNOynGwVz"
+  notifications = (
+    var.environment == "prod" ?
+    [{ uid = local.opsgenie_notification_channel }] :
+    []
+  )
 
-data "jsonnet_file" "dashboard" {
-  source = "${path.module}/dashboard.jsonnet"
+  target_group = split(":", var.target_group_arn)[5]
 
-  ext_str = {
-    dashboard_title = "${module.this.stage} - ${module.this.name}"
-    dashboard_uid   = "${module.this.stage}-${module.this.name}"
-
-    prometheus_uid = grafana_data_source.prometheus.uid
-  }
-}
-
-# JSON Dashboard. When exporting from Grafana make sure that all
-# variables are replaced properly
-resource "grafana_dashboard" "main" {
-  overwrite   = true
-  message     = "Updated by Terraform"
-  config_json = data.jsonnet_file.dashboard.rendered
+  # Turns the arn into the format expected by the Grafana provider e.g.
+  # net/prod-relay-load-balancer/e9a51c46020a0f85
+  load_balancer = join("/", slice(split("/", var.load_balancer_arn), 1, 4))
 }

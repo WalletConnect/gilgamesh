@@ -17,15 +17,15 @@ terraform {
     }
     grafana = {
       source  = "grafana/grafana"
-      version = "~> 1.28"
+      version = "~> 1.40"
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.4.3"
+      version = "~> 3.5"
     }
     github = {
       source  = "integrations/github"
-      version = "5.7.0"
+      version = "5.26"
     }
   }
 }
