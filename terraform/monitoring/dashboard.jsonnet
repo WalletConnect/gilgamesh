@@ -63,6 +63,7 @@ dashboard.new(
     panels.history.registrations(ds, vars)      { gridPos: pos._1 },
 
   row.new('Load Balancer'),
+    panels.lb.active_connections(ds, vars)      { gridPos: pos._2 },
     panels.lb.healthy_hosts(ds, vars)           { gridPos: pos._2 },
 
   row.new('Database'),

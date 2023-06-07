@@ -22,6 +22,7 @@
   },
 
   lb: {
+    active_connections:             (import 'lb/active_connections.libsonnet'       ).new,
     healthy_hosts:                  (import 'lb/healthy_hosts.libsonnet'            ).new,
   }
 }
