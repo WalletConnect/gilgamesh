@@ -5,6 +5,7 @@ on:
 
   pull_request:
     paths-ignore:
+      - ".github/**"
       - "spec/**"
       - "terraform/**"
       - "*.md"
@@ -14,6 +15,7 @@ on:
     branches:
       - "main"
     paths-ignore:
+      - ".github/**"
       - "spec/**"
       - "terraform/**"
       - "*.md"
