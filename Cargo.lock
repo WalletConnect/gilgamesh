@@ -2317,7 +2317,7 @@ checksum = "f162c6dd7b008981e4d40210aca20b4bd0f9b60ca9271061b07f78537722f2e1"
 [[package]]
 name = "relay_rpc"
 version = "0.1.0"
-source = "git+https://github.com/WalletConnect/WalletConnectRust.git?rev=7f08502440842308cde74bb7f4cddc4bbd7d6fbc#7f08502440842308cde74bb7f4cddc4bbd7d6fbc"
+source = "git+https://github.com/WalletConnect/WalletConnectRust.git?rev=5f4dd3cbf4a67e40c47503706f8e0ae8d8bdd435#5f4dd3cbf4a67e40c47503706f8e0ae8d8bdd435"
 dependencies = [
  "bs58",
  "chrono",
@@ -2331,6 +2331,7 @@ dependencies = [
  "serde",
  "serde-aux",
  "serde_json",
+ "sha2 0.10.6",
  "thiserror",
 ]
 
