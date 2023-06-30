@@ -4,7 +4,7 @@ use {
         increment_counter,
         increment_counter_with,
         state::AppState,
-        store::messages::{Message, StoreMessages},
+        store::messages::{Message, StoreMessages, MAGIC_SKIP_SERIALIZING_METHOD},
     },
     axum::{
         extract::{Query, State},
@@ -100,6 +100,13 @@ pub async fn handler(
 
     increment_counter!(state.metrics, get_queries);
     increment_counter_with!(state.metrics, served_items, messages.len() as u64);
+
+    // Prematurely make breaking change of removing method
+    // https://walletconnect.slack.com/archives/C04CKNV4GN8/p1688127376863359
+    let mut messages = messages;
+    for message in messages.iter_mut() {
+        message.method = MAGIC_SKIP_SERIALIZING_METHOD.to_owned().into();
+    }
 
     let response = GetMessagesResponse {
         topic: query.topic.clone(),

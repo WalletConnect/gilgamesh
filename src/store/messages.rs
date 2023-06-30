@@ -28,6 +28,7 @@ pub struct Message {
     #[serde(rename = "ts")]
     pub timestamp: bson::DateTime,
     /// The messages method (`publish`/`subscription`).
+    #[serde(skip_serializing_if = "is_magic_skip_serializing_method")]
     pub method: Arc<str>,
     /// The message's client ID.
     pub client_id: Arc<str>,
@@ -37,6 +38,15 @@ pub struct Message {
     pub message_id: Arc<str>,
     /// The actual message.
     pub message: Arc<str>,
+}
+
+// Because `#[derive(Modal)]` requires `#[derive(Serialize)]` I assume
+// `#[serde(skip_serializing)]` skips serializing when *writing* to MongoDB, not
+// just rendering as JSON. So using magic value instead so we can rollback if
+// necessary and we don't loose any data.
+pub const MAGIC_SKIP_SERIALIZING_METHOD: &str = "956ab70e-bbb0-4c23-af39-95a252275bfe";
+fn is_magic_skip_serializing_method(method: &str) -> bool {
+    method == MAGIC_SKIP_SERIALIZING_METHOD
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
