@@ -28,7 +28,10 @@ pub struct Message {
     #[serde(rename = "ts")]
     pub timestamp: bson::DateTime,
     /// The messages method (`publish`/`subscription`).
-    #[serde(skip_serializing_if = "is_magic_skip_serializing_method")]
+    #[serde(
+        skip_serializing_if = "is_magic_skip_serializing_method",
+        default = "default_magic_skip_serializing_method"
+    )]
     pub method: Arc<str>,
     /// The message's client ID.
     pub client_id: Arc<str>,
@@ -47,6 +50,10 @@ pub struct Message {
 pub const MAGIC_SKIP_SERIALIZING_METHOD: &str = "956ab70e-bbb0-4c23-af39-95a252275bfe";
 fn is_magic_skip_serializing_method(method: &str) -> bool {
     method == MAGIC_SKIP_SERIALIZING_METHOD
+}
+
+fn default_magic_skip_serializing_method() -> Arc<str> {
+    MAGIC_SKIP_SERIALIZING_METHOD.to_owned().into()
 }
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
