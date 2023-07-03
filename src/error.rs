@@ -85,7 +85,7 @@ pub enum Error {
     InternalServerError,
 
     #[error(transparent)]
-    JwtError(#[from] relay_rpc::auth::JwtVerificationError),
+    JwtError(#[from] relay_rpc::jwt::JwtError),
 
     #[error(transparent)]
     AuthError(#[from] relay_rpc::auth::Error),

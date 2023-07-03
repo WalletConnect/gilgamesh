@@ -17,7 +17,7 @@ tower-http = { version = "0.4.0", features = ["trace", "cors"] }
 hyper = "0.14"
 
 # WalletConnect
-relay_rpc = { git = "https://github.com/WalletConnect/WalletConnectRust.git", rev = "7f08502440842308cde74bb7f4cddc4bbd7d6fbc" }
+relay_rpc = { git = "https://github.com/WalletConnect/WalletConnectRust.git", rev = "5f4dd3cbf4a67e40c47503706f8e0ae8d8bdd435" }
 
 # Database
 wither = { git = "https://github.com/WalletConnect/wither.git", rev = "6a70e74", features = ["bson-chrono-0_4"] }

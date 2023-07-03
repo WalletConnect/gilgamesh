@@ -35,7 +35,7 @@ fn get_client_jwt() -> (String, ClientId) {
     let random_client_id = DecodedClientId(*keypair.public_key().as_bytes());
     let client_id = ClientId::from(random_client_id);
 
-    let jwt = relay_rpc::auth::AuthToken::new(client_id.value().clone())
+    let jwt = relay_rpc::auth::AuthToken::new(client_id.to_string())
         .aud(TEST_RELAY_URL.to_string())
         .as_jwt(&keypair)
         .unwrap()

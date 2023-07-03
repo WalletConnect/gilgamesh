@@ -8,7 +8,10 @@ use {
         state::{AppState, CachedRegistration},
     },
     axum::{extract::State, Json},
-    relay_rpc::auth::Jwt,
+    relay_rpc::{
+        domain::ClientId,
+        jwt::{JwtBasicClaims, VerifyableClaims},
+    },
     serde::{Deserialize, Serialize},
     std::sync::Arc,
 };
@@ -25,7 +28,9 @@ pub async fn handler(
     AuthBearer(token): AuthBearer,
     Json(body): Json<RegisterPayload>,
 ) -> error::Result<Response> {
-    let client_id = Jwt(token).decode(&state.auth_aud.clone())?;
+    let claims = JwtBasicClaims::try_from_str(&token)?;
+    claims.verify_basic(&state.auth_aud, None)?;
+    let client_id = ClientId::from(claims.iss);
 
     state
         .registration_store
