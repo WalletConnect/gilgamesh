@@ -11,6 +11,7 @@ local targets   = grafana.targets;
       datasource  = ds.cloudwatch,
     )
     .configure(defaults.overrides.memory(defaults.configuration.timeseries_resource))
+
     .setAlert(defaults.alerts.memory(
       namespace     = vars.namespace,
       title         = 'ECS',
