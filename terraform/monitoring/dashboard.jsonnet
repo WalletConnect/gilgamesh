@@ -67,8 +67,8 @@ dashboard.new(
     panels.lb.healthy_hosts(ds, vars)           { gridPos: pos._2 },
 
     panels.lb.requests(ds, vars)                { gridPos: pos._3 },
-//    panels.lb.error_4xx(ds, vars)               { gridPos: pos._3 },
-//    panels.lb.error_5xx(ds, vars)               { gridPos: pos._3 },
+    panels.lb.error_4xx(ds, vars)               { gridPos: pos._3 },
+    panels.lb.error_5xx(ds, vars)               { gridPos: pos._3 },
 
   row.new('Database'),
     panels.db.cpu(ds, vars)                     { gridPos: pos._3 },
