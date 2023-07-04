@@ -17,34 +17,6 @@ local _configuration = defaults.configuration.timeseries
     value : threshold,
   });
 
-local _alert(namespace, env, notifications) = grafana.alert.new(
-  namespace     = namespace,
-  name          = "%(env)s - 5XX alert"     % { env: grafana.utils.strings.capitalize(env) },
-  message       = '%(env)s - Too many 5XX'  % { env: grafana.utils.strings.capitalize(env) },
-  notifications = notifications,
-  noDataState   = 'no_data',
-  conditions    = [
-    grafana.alertCondition.new(
-      evaluatorParams = [ threshold ],
-      evaluatorType   = 'gt',
-      operatorType    = 'or',
-      queryRefId      = 'ELB',
-      queryTimeStart  = '5m',
-      queryTimeEnd    = 'now',
-      reducerType     = grafana.alert_reducers.Avg
-    ),
-    grafana.alertCondition.new(
-      evaluatorParams = [ threshold ],
-      evaluatorType   = 'gt',
-      operatorType    = 'or',
-      queryRefId      = 'Target',
-      queryTimeStart  = '5m',
-      queryTimeEnd    = 'now',
-      reducerType     = grafana.alert_reducers.Avg
-    ),
-  ],
-);
-
 {
   new(ds, vars)::
     panels.timeseries(
@@ -56,8 +28,6 @@ local _alert(namespace, env, notifications) = grafana.alert.new(
       op    = 'gt',
       value = threshold,
     )
-
-    .setAlert(_alert(vars.namespace, vars.environment, vars.notifications))
 
     .addTarget(targets.cloudwatch(
       alias       = 'ELB',
