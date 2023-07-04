@@ -13,6 +13,7 @@ local targets   = grafana.targets;
     .configure(defaults.overrides.memory(defaults.configuration.timeseries_resource))
     .setAlert(defaults.alerts.memory(
       namespace     = vars.namespace,
+      title         = 'ECS',
       env           = vars.environment,
       notifications = vars.notifications,
     ))

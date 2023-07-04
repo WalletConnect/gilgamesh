@@ -24,5 +24,8 @@
   lb: {
     active_connections:             (import 'lb/active_connections.libsonnet'       ).new,
     healthy_hosts:                  (import 'lb/healthy_hosts.libsonnet'            ).new,
+    error_4xx:                      (import 'lb/error_4xx.libsonnet'                ).new,
+    error_5xx:                      (import 'lb/error_5xx.libsonnet'                ).new,
+    requests:                       (import 'lb/requests.libsonnet'                 ).new,
   }
 }
