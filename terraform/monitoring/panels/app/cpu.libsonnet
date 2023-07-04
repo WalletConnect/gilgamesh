@@ -14,8 +14,8 @@ local overrides = defaults.overrides;
     .configure(overrides.cpu(defaults.configuration.timeseries_resource))
     .setAlert(defaults.alerts.cpu(
       namespace     = vars.namespace,
-      env           = vars.environment,
       title         = 'ECS',
+      env           = vars.environment,
       notifications = vars.notifications,
     ))
 
