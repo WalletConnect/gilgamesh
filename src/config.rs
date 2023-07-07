@@ -4,7 +4,6 @@ const DEFAULT_PORT_NUMBER: u16 = 3001;
 const DEFAULT_LOG_LEVEL: &str = "WARN";
 const DEFAULT_RELAY_URL: &str = "https://relay.walletconnect.com";
 const DEFAULT_VALIDATE_SIGNATURES: bool = true;
-const DEFAULT_CORS_ALLOWED_ORIGINS: &[&str] = &["*"];
 
 /// The server configuration.
 #[derive(Deserialize, Debug, Clone, Eq, PartialEq)]
@@ -26,9 +25,6 @@ pub struct Configuration {
     /// An internal flag to disable logging, cannot be defined by user.
     #[serde(default = "default_is_test", skip)]
     pub is_test: bool,
-    // CORS
-    #[serde(default = "default_cors_allowed_origins")]
-    pub cors_allowed_origins: Vec<String>,
 
     pub otel_exporter_otlp_endpoint: Option<String>,
     pub telemetry_prometheus_port: Option<u16>,
@@ -63,13 +59,6 @@ fn default_validate_signatures() -> bool {
 
 fn default_is_test() -> bool {
     false
-}
-
-fn default_cors_allowed_origins() -> Vec<String> {
-    DEFAULT_CORS_ALLOWED_ORIGINS
-        .iter()
-        .map(|s| s.to_string())
-        .collect::<Vec<String>>()
 }
 
 /// Create a new configuration from the environment variables.

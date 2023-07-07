@@ -4,7 +4,7 @@ use {
         state::{MessagesStorageArc, RegistrationStorageArc},
     },
     axum::{
-        http::{HeaderValue, Method},
+        http,
         routing::{get, post},
         Router,
     },
@@ -16,7 +16,7 @@ use {
     tokio::{select, sync::broadcast},
     tower::ServiceBuilder,
     tower_http::{
-        cors::{AllowOrigin, CorsLayer},
+        cors::{Any, CorsLayer},
         trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
     },
 };
@@ -92,37 +92,22 @@ pub async fn bootstrap(
     let port = state.config.port;
     let private_port = state.config.telemetry_prometheus_port.unwrap_or(3001);
 
-    let allowed_origins = state.config.cors_allowed_origins.clone();
-
     let state_arc = Arc::new(state);
 
-    let global_middleware = ServiceBuilder::new()
-        .layer(
-            TraceLayer::new_for_http()
-                .make_span_with(DefaultMakeSpan::new().include_headers(true))
-                .on_request(DefaultOnRequest::new().level(config.log_level()))
-                .on_response(
-                    DefaultOnResponse::new()
-                        .level(config.log_level())
-                        .include_headers(true),
-                ),
-        )
-        .layer(if allowed_origins == vec!["*".to_string()] {
-            info!("CORS is disabled");
-            CorsLayer::new()
-                .allow_methods([Method::GET, Method::POST, Method::DELETE])
-                .allow_origin(AllowOrigin::any())
-        } else {
-            info!("CORS is enabled for {:?}", allowed_origins);
-            CorsLayer::new()
-                .allow_methods([Method::GET, Method::POST, Method::DELETE])
-                .allow_origin(
-                    allowed_origins
-                        .iter()
-                        .map(|v| v.parse::<HeaderValue>().unwrap())
-                        .collect::<Vec<HeaderValue>>(),
-                )
-        });
+    let global_middleware = ServiceBuilder::new().layer(
+        TraceLayer::new_for_http()
+            .make_span_with(DefaultMakeSpan::new().include_headers(true))
+            .on_request(DefaultOnRequest::new().level(config.log_level()))
+            .on_response(
+                DefaultOnResponse::new()
+                    .level(config.log_level())
+                    .include_headers(true),
+            ),
+    );
+
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_headers([http::header::CONTENT_TYPE, http::header::AUTHORIZATION]);
 
     let app = Router::new()
         .route("/health", get(handlers::health::handler))
@@ -131,6 +116,7 @@ pub async fn bootstrap(
         .route("/register", get(handlers::get_registration::handler))
         .route("/register", post(handlers::register::handler))
         .layer(global_middleware)
+        .layer(cors)
         .with_state(state_arc.clone());
 
     let private_app = Router::new()
