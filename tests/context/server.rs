@@ -55,7 +55,6 @@ impl Gilgamesh {
                     validate_signatures: false,
                     mongo_address,
                     is_test: true,
-                    cors_allowed_origins: vec!["*".to_string()],
                     otel_exporter_otlp_endpoint: None,
                     telemetry_prometheus_port: Some(get_random_port()),
                 };
