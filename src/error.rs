@@ -75,6 +75,9 @@ pub enum Error {
     #[error("invalid options provided for {0}")]
     InvalidOptionsProvided(String),
 
+    #[error("invalid update request")]
+    InvalidUpdateRequest,
+
     #[error(transparent)]
     FromUtf8Error(#[from] std::string::FromUtf8Error),
 
@@ -186,6 +189,14 @@ impl IntoResponse for Error {
                 vec![ResponseError {
                     name: "topic".to_string(),
                     message: "encrypted push notifications require topic to be set".to_string(),
+                }],
+                vec![],
+            ),
+            Error::InvalidUpdateRequest => crate::handlers::Response::new_failure(
+                StatusCode::BAD_REQUEST,
+                vec![ResponseError {
+                    name: "appendTags/removeTags".to_string(),
+                    message: "cannot append and remove the same tag".to_string(),
                 }],
                 vec![],
             ),

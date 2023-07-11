@@ -42,7 +42,9 @@ pub async fn handler(
         .await;
 
     Ok(Json(RegisterPayload {
-        tags: registration.tags,
+        tags: Some(registration.tags),
+        append_tags: None,
+        remove_tags: None,
         relay_url: registration.relay_url,
     }))
 }

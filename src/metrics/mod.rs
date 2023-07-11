@@ -24,6 +24,8 @@ pub struct Metrics {
     pub served_items: Counter<u64>,
 
     pub register: Counter<u64>,
+    pub registration_overwrite: Counter<u64>,
+    pub registration_update: Counter<u64>,
     pub cached_registrations: Counter<u64>,
     pub fetched_registrations: Counter<u64>,
     pub registration_cache_invalidation: Counter<u64>,
@@ -71,7 +73,17 @@ impl Metrics {
 
         let register = meter
             .u64_counter("register")
-            .with_description("The number of calls to the register method")
+            .with_description("The total number of calls to the register method")
+            .init();
+
+        let registration_overwrite = meter
+            .u64_counter("register")
+            .with_description("The number of calls to the register method in overwrite mode")
+            .init();
+
+        let registration_update = meter
+            .u64_counter("register")
+            .with_description("The number of calls to the register method in update mode")
             .init();
 
         let cached_registrations = meter
@@ -96,6 +108,8 @@ impl Metrics {
             get_queries,
             served_items,
             register,
+            registration_overwrite,
+            registration_update,
             cached_registrations,
             fetched_registrations,
             registration_cache_invalidation,
