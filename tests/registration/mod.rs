@@ -164,8 +164,10 @@ async fn test_register(ctx: &mut ServerContext) {
             test.name
         );
 
+        let mut registration = registration.unwrap();
+        registration.tags.sort();
         assert_eq!(
-            registration.unwrap().tags,
+            registration.tags,
             test.expected.clone(),
             "{:?} - Tags did not match expected",
             test.name

@@ -13,7 +13,7 @@ use {
         jwt::{JwtBasicClaims, VerifyableClaims},
     },
     serde::{Deserialize, Serialize},
-    std::sync::Arc,
+    std::{collections::HashSet, sync::Arc},
 };
 
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
@@ -38,14 +38,24 @@ pub async fn handler(
 
     if let Some(tags) = body.tags {
         increment_counter!(state.metrics, registration_overwrite);
+
+        let tags = tags.into_iter().collect::<HashSet<_>>();
         overwrite_registration(&state, client_id.clone(), tags, body.relay_url).await?;
     } else {
         increment_counter!(state.metrics, registration_update);
+
+        let append_tags = body
+            .append_tags
+            .map(|tags| tags.into_iter().collect::<HashSet<_>>());
+        let remove_tags = body
+            .remove_tags
+            .map(|tags| tags.into_iter().collect::<HashSet<_>>());
+
         update_registration(
             &state,
             client_id.clone(),
-            body.append_tags,
-            body.remove_tags,
+            append_tags,
+            remove_tags,
             body.relay_url,
         )
         .await?;
@@ -57,7 +67,7 @@ pub async fn handler(
 async fn overwrite_registration(
     state: &Arc<AppState>,
     client_id: ClientId,
-    tags: Vec<Arc<str>>,
+    tags: HashSet<Arc<str>>,
     relay_url: Arc<str>,
 ) -> error::Result<Response> {
     state
@@ -72,7 +82,7 @@ async fn overwrite_registration(
     state
         .registration_cache
         .insert(client_id.into_value(), CachedRegistration {
-            tags,
+            tags: tags.into_iter().collect::<Vec<_>>(),
             relay_url,
         })
         .await;
@@ -83,16 +93,15 @@ async fn overwrite_registration(
 async fn update_registration(
     state: &Arc<AppState>,
     client_id: ClientId,
-    append_tags: Option<Vec<Arc<str>>>,
-    remove_tags: Option<Vec<Arc<str>>>,
+    append_tags: Option<HashSet<Arc<str>>>,
+    remove_tags: Option<HashSet<Arc<str>>>,
     relay_url: Arc<str>,
 ) -> error::Result<Response> {
-    if let (Some(append_tags), Some(remove_tags)) = (append_tags.clone(), remove_tags.clone()) {
-        for tag in remove_tags.iter() {
-            if append_tags.contains(tag) {
-                return Err(Error::InvalidUpdateRequest);
-            }
-        }
+    let append_tags = append_tags.unwrap_or_default();
+    let remove_tags = remove_tags.unwrap_or_default();
+
+    if remove_tags.intersection(&append_tags).count() > 0 {
+        return Err(Error::InvalidUpdateRequest);
     }
 
     let registration = state
@@ -100,23 +109,16 @@ async fn update_registration(
         .get_registration(client_id.as_ref())
         .await?;
 
-    let mut tags = registration.tags;
-
-    if let Some(remove_tags) = remove_tags {
-        for r_tag in remove_tags.iter() {
-            if let Some(index) = tags.iter().position(|tag| tag.eq(r_tag)) {
-                tags.remove(index);
-            }
-        }
-    }
-
-    if let Some(append_tags) = append_tags {
-        for a_tag in append_tags.iter() {
-            if !tags.contains(a_tag) {
-                tags.push(a_tag.clone());
-            }
-        }
-    }
+    let tags = registration
+        .tags
+        .into_iter()
+        .collect::<HashSet<_>>()
+        .difference(&remove_tags)
+        .cloned()
+        .collect::<HashSet<_>>()
+        .union(&append_tags)
+        .cloned()
+        .collect();
 
     overwrite_registration(state, client_id, tags, relay_url).await
 }
