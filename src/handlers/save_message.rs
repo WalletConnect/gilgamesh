@@ -16,7 +16,7 @@ use {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
-pub struct HistoryPayload {
+pub struct ArchivePayload {
     pub method: Arc<str>,
     pub client_id: Arc<str>,
     pub topic: Arc<str>,
@@ -27,7 +27,7 @@ pub struct HistoryPayload {
 
 pub async fn handler(
     StateExtractor(state): StateExtractor<Arc<AppState>>,
-    RequireValidSignature(Json(payload)): RequireValidSignature<Json<HistoryPayload>>,
+    RequireValidSignature(Json(payload)): RequireValidSignature<Json<ArchivePayload>>,
 ) -> error::Result<Response> {
     debug!("Received `save_message` query: {:?}", payload);
 

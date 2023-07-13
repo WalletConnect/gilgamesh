@@ -50,33 +50,33 @@ clean:
 
 # Build docker image
 build-docker:
-  @echo '=> Build gilgamesh docker image'
-  docker-compose -f ./ops/docker-compose.gilgamesh.yml -f ./ops/docker-compose.storage.yml build gilgamesh
+  @echo '=> Build archive docker image'
+  docker-compose -f ./ops/docker-compose.archive.yml -f ./ops/docker-compose.storage.yml build archive
 
-# Start gilgamesh & storage services on docker
+# Start archive & storage services on docker
 run-docker:
   @echo '==> Start services on docker'
-  @echo '==> Use run gilgamesh app on docker with "cargo-watch"'
+  @echo '==> Use run archive app on docker with "cargo-watch"'
   @echo '==> for more details check https://crates.io/crates/cargo-watch'
-  docker-compose -f ./ops/docker-compose.gilgamesh.yml -f ./ops/docker-compose.storage.yml up -d
+  docker-compose -f ./ops/docker-compose.archive.yml -f ./ops/docker-compose.storage.yml up -d
 
-# Stop gilgamesh & storage services on docker
+# Stop archive & storage services on docker
 stop-docker:
   @echo '==> Stop services on docker'
-  docker-compose -f ./ops/docker-compose.gilgamesh.yml -f ./ops/docker-compose.storage.yml down
+  docker-compose -f ./ops/docker-compose.archive.yml -f ./ops/docker-compose.storage.yml down
 
-# Clean up docker gilgamesh & storage services
+# Clean up docker archive & storage services
 clean-docker:
   @echo '==> Clean services on docker'
-  docker-compose  -f ./ops/docker-compose.gilgamesh.yml -f ./ops/docker-compose.storage.yml stop
-  docker-compose -f ./ops/docker-compose.gilgamesh.yml -f ./ops/docker-compose.storage.yml rm -f
+  docker-compose  -f ./ops/docker-compose.archive.yml -f ./ops/docker-compose.storage.yml stop
+  docker-compose -f ./ops/docker-compose.archive.yml -f ./ops/docker-compose.storage.yml rm -f
 
 # Start storage services on docker
 run-storage-docker:
   @echo '==> Start storage services on docker'
   docker-compose -f ./ops/docker-compose.storage.yml up -d
 
-# Stop gilgamesh & storage services on docker
+# Stop archive & storage services on docker
 stop-storage-docker:
   @echo '==> Stop storage services on docker'
   docker-compose -f ./ops/docker-compose.storage.yml down
@@ -90,12 +90,12 @@ clean-storage-docker:
 # List services running on docker
 ps-docker:
   @echo '==> List services on docker'
-  docker-compose -f ./ops/docker-compose.gilgamesh.yml -f ./ops/docker-compose.storage.yml ps
+  docker-compose -f ./ops/docker-compose.archive.yml -f ./ops/docker-compose.storage.yml ps
 
 # Run project test suite on docker containers
 test-docker:
   @echo '==> Run tests on docker container'
-  docker-compose -f ./ops/docker-compose.storage.yml -f ./ops/docker-compose.test.yml run --rm gilgamesh-test
+  docker-compose -f ./ops/docker-compose.storage.yml -f ./ops/docker-compose.test.yml run --rm archive-test
 
 run-jaeger:
   @echo '==> Run opentelemetry jaeger docker container'
@@ -174,6 +174,6 @@ _bump-cargo-version version file temp=`mktemp`:
   @perl -spe 'if (/^version/) { s/("[\w.]+")/"$version"/ }' -- -version={{version}} < {{file}} > {{temp}}
   @mv -f {{temp}} {{file}}
 
-restart-gilgamesh-docker:
-  @echo '==> Restart gilgamesh service on docker'
-  docker-compose up -d --build --force-recreate --no-deps gilgamesh
+restart-archive-docker:
+  @echo '==> Restart archive service on docker'
+  docker-compose up -d --build --force-recreate --no-deps archive

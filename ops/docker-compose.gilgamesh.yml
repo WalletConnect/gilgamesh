@@ -1,14 +1,14 @@
 version: '3.9'
 
 services:
-  gilgamesh:
+  archive:
     build:
       dockerfile: ./ops/Dockerfile-dev
       context: ../
     volumes:
-      - ../:/gilgamesh/
+      - ../:/archive/
     networks:
-      - gilgamesh
+      - archive
     depends_on:
       mongo:
         condition: service_healthy
@@ -22,7 +22,7 @@ services:
       - LOG_LEVEL=INFO
       - TELEMETRY_ENABLED=true
       - TELEMETRY_GRPC_URL=http://jaeger:4317
-      - MONGO_ADDRESS=mongodb://admin:admin@mongo:27017/gilgamesh?authSource=admin
+      - MONGO_ADDRESS=mongodb://admin:admin@mongo:27017/archive?authSource=admin
     healthcheck:
       test: [ "CMD", "curl", "localhost:3000/health" ]
       interval: 5s

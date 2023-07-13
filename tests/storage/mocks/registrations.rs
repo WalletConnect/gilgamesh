@@ -1,9 +1,9 @@
 use {
-    async_trait::async_trait,
-    gilgamesh::store::{
+    archive::store::{
         registrations::{Registration, RegistrationStore},
         StoreError,
     },
+    async_trait::async_trait,
     moka::future::Cache,
     std::{fmt::Debug, sync::Arc},
 };

@@ -1,5 +1,5 @@
 locals {
-  prometheus_url = "https://aps-workspaces.${module.this.environment}.amazonaws.com/workspaces/${var.prometheus_workspace_id}/"
+  prometheus_url = "https://aps-workspaces.${module.this.environment}.amazonaws.com/workspaces/${aws_prometheus_workspace.prometheus.id}/"
 }
 
 resource "grafana_data_source" "prometheus" {

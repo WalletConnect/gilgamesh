@@ -75,7 +75,7 @@ impl AppState {
             relay_client: RelayClient::new(relay_url),
             auth_aud: [
                 "wss://relay.walletconnect.com".to_owned(),
-                "https://history.walletconnect.com".to_owned(),
+                "https://archive.walletconnect.com".to_owned(),
             ]
             .into(),
         })

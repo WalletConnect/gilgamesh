@@ -8,3 +8,11 @@ terraform {
     }
   }
 }
+
+provider "aws" {
+  region = module.this.environment
+
+  default_tags {
+    tags = module.this.tags
+  }
+}

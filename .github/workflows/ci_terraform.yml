@@ -35,7 +35,7 @@ jobs:
         id: tf-init
         uses: WalletConnect/actions/terraform/init/@1.0.3
         with:
-          environment: staging
+          environment: staging/app
 
       - name: Check Terraform Formatting
         id: tf-fmt
@@ -86,8 +86,8 @@ jobs:
       contents: 'read'
       pull-requests: 'write'
     environment:
-      name: infra/staging
-      url: https://staging.history.walletconnect.com/health
+      name: staging/infra
+      url: https://staging.archive.walletconnect.com/health
 
     steps:
       - name: Checkout
@@ -122,7 +122,7 @@ jobs:
         id: tf-init
         uses: WalletConnect/actions/terraform/init/@1.0.3
         with:
-          environment: staging
+          environment: staging/app
 
       - name: Run Terraform Plan
         id: tf-plan-staging
@@ -133,7 +133,7 @@ jobs:
           TF_VAR_image_version: ${{ needs.get-version.outputs.version }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          environment: staging
+          environment: staging/app
 
       - name: Delete Grafana key
         id: grafana-delete-key
@@ -153,8 +153,8 @@ jobs:
       contents: 'read'
       pull-requests: 'write'
     environment:
-      name: infra/prod
-      url: https://history.walletconnect.com/health
+      name: prod/infra
+      url: https://archive.walletconnect.com/health
 
     steps:
       - name: Checkout
@@ -189,7 +189,7 @@ jobs:
         id: tf-init
         uses: WalletConnect/actions/terraform/init/@1.0.3
         with:
-          environment: prod
+          environment: prod/app
 
       - name: Run Terraform Plan
         id: tf-plan-staging
@@ -200,7 +200,7 @@ jobs:
           TF_VAR_image_version: ${{ needs.get-version.outputs.version }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          environment: prod
+          environment: prod/app
 
       - name: Delete Grafana key
         id: grafana-delete-key
@@ -211,11 +211,12 @@ jobs:
           workspace-id: ${{ steps.grafana-get-details.outputs.workspace-id }}
 
 
-  kick-off-release:
-    if: github.event_name != 'pull_request'
-    needs:
-      - check-fmt
-      - plan-staging
-      - plan-prod
-    uses: ./.github/workflows/cd.yml
-    secrets: inherit
+# TODO: Enable release
+#  release:
+#    if: github.event_name != 'pull_request'
+#    needs:
+#      - check-fmt
+#      - plan-staging
+#      - plan-prod
+#    uses: ./.github/workflows/cd.yml
+#    secrets: inherit

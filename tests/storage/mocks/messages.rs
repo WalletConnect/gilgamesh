@@ -1,10 +1,10 @@
 use {
-    async_trait::async_trait,
-    chrono::Utc,
-    gilgamesh::store::{
+    archive::store::{
         messages::{Message, MessagesStore, StoreMessages},
         StoreError,
     },
+    async_trait::async_trait,
+    chrono::Utc,
     moka::future::Cache,
     std::{fmt::Debug, sync::Arc},
 };

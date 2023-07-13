@@ -16,7 +16,7 @@ local ds    = {
   },
 };
 local vars  = {
-  namespace:        'History',
+  namespace:        'Archive',
   environment:      std.extVar('environment'),
   notifications:    std.parseJson(std.extVar('notifications')),
 
@@ -55,12 +55,12 @@ dashboard.new(
     panels.app.cpu(ds, vars)                    { gridPos: pos._2 },
     panels.app.memory(ds, vars)                 { gridPos: pos._2 },
 
-  row.new('History'),
-    panels.history.received_items(ds, vars)     { gridPos: pos._2 },
-    panels.history.stored_items(ds, vars)       { gridPos: pos._2 },
-    panels.history.get_queries(ds, vars)        { gridPos: pos._2 },
-    panels.history.served_items(ds, vars)       { gridPos: pos._2 },
-    panels.history.registrations(ds, vars)      { gridPos: pos._1 },
+  row.new('Archive'),
+    panels.archive.received_items(ds, vars)     { gridPos: pos._2 },
+    panels.archive.stored_items(ds, vars)       { gridPos: pos._2 },
+    panels.archive.get_queries(ds, vars)        { gridPos: pos._2 },
+    panels.archive.served_items(ds, vars)       { gridPos: pos._2 },
+    panels.archive.registrations(ds, vars)      { gridPos: pos._1 },
 
   row.new('Load Balancer'),
     panels.lb.active_connections(ds, vars)      { gridPos: pos._2 },

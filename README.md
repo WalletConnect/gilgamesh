@@ -1,14 +1,6 @@
-# Gilgamesh
+# Archive Service
 
-HTTP service managing users' e2e encrypted message histories.
-
-This project also includes the standard CI/CD:
-- Release
-- Rust CI
-- Terraform CI
-- CD
-- Intake
-- Mocha (NodeJS) based integration tests
+HTTP service managing topics e2e encrypted messages archive.
 
 ## Running the app
 

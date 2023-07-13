@@ -15,7 +15,7 @@ mod registration;
 mod simple;
 mod storage;
 
-const TEST_RELAY_URL: &str = "https://history.walletconnect.com";
+const TEST_RELAY_URL: &str = "https://archive.walletconnect.com";
 
 pub type ErrorResult<T> = Result<T, TestError>;
 
@@ -25,7 +25,7 @@ pub enum TestError {
     Elapsed(#[from] tokio::time::error::Elapsed),
 
     #[error(transparent)]
-    Gilgamesh(#[from] gilgamesh::error::Error),
+    Archive(#[from] archive::error::Error),
 }
 
 fn get_client_jwt() -> (String, ClientId) {

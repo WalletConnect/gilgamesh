@@ -9,15 +9,15 @@ declare let process: {
 }
 
 const BASE_URLS = new Map<string, string>([
-  ['prod', 'https://history.walletconnect.com'],
-  ['staging', 'https://staging.history.walletconnect.com'],
-  ['dev', 'https://dev.history.walletconnect.com'],
+  ['prod', 'https://archive.walletconnect.com'],
+  ['staging', 'https://staging.archive.walletconnect.com'],
+  ['dev', 'https://dev.archive.walletconnect.com'],
   ['local', 'http://localhost:3000'],
 ])
 
 const BASE_URL = BASE_URLS.get(process.env.JEST_ENV)
 
-describe('Gilgamesh', () => {
+describe('Archive', () => {
   describe('Health', () => {
     const url = `${BASE_URL}/health`
 

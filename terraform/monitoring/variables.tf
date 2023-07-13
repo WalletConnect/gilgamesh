@@ -1,8 +1,3 @@
-variable "prometheus_workspace_id" {
-  description = "The workspace ID for the Prometheus workspace."
-  type        = string
-}
-
 variable "ecs_service_name" {
   description = "The name of the ECS service."
   type        = string
@@ -20,5 +15,10 @@ variable "load_balancer_arn" {
 
 variable "docdb_cluster_id" {
   description = "The ID of the DocumentDB cluster."
+  type        = string
+}
+
+variable "grafana_endpoint" {
+  description = "The endpoint of the Grafana instance used for monitoring."
   type        = string
 }

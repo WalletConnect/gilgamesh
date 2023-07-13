@@ -49,7 +49,7 @@ impl Metrics {
 
         opentelemetry::global::set_meter_provider(meter);
 
-        let meter = opentelemetry::global::meter("history-server");
+        let meter = opentelemetry::global::meter("archive-server");
 
         let received_items = meter
             .u64_counter("received_items")

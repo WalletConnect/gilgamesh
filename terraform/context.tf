@@ -5,9 +5,9 @@ module "this" {
   namespace   = "walletconnect"
   environment = var.region
   stage       = terraform.workspace
-  name        = "history"
+  name        = "archive"
 
   tags = {
-    Application = "history"
+    Application = "archive"
   }
 }

@@ -30,7 +30,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  tasks:
+  checks:
     name: "${{ matrix.cargo.name }} [${{ matrix.os }}/rust-${{matrix.rust}}]"
     runs-on: ubuntu-latest
     strategy:
@@ -182,7 +182,7 @@ jobs:
         uses: supercharge/mongodb-github-action@1.8.0
         with:
           mongodb-version: '4.4'
-          mongodb-db: gilgamesh
+          mongodb-db: archive
 
       - name: Install Protoc
         uses: arduino/setup-protoc@v1
@@ -191,7 +191,7 @@ jobs:
       - name: "Storage Tests"
         uses: actions-rs/cargo@v1
         env:
-          MONGO_ADDRESS: mongodb://localhost:27017/gilgamesh
+          MONGO_ADDRESS: mongodb://localhost:27017/archive
         with:
           command: test
           args: --features storage-tests
@@ -203,8 +203,9 @@ jobs:
         run: sccache --stop-server || true
 
 
-  release:
-    needs: [tasks, integration]
-    if: github.event_name != 'pull_request'
-    uses: ./.github/workflows/release.yml
-    secrets: inherit
+# TODO: Enable release
+#  release:
+#    needs: [checks, integration]
+#    if: github.event_name != 'pull_request'
+#    uses: ./.github/workflows/release.yml
+#    secrets: inherit

@@ -1,6 +1,6 @@
 use {
     crate::context::StoreContext,
-    gilgamesh::store::{
+    archive::store::{
         registrations::{Registration, RegistrationStore},
         StoreError,
     },
