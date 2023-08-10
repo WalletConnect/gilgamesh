@@ -115,7 +115,7 @@ resource "aws_ecs_service" "app_service" {
   cluster         = aws_ecs_cluster.app_cluster.id
   task_definition = aws_ecs_task_definition.app_task_definition.arn
   launch_type     = "FARGATE"
-  desired_count   = 1
+  desired_count   = 3
   propagate_tags  = "TASK_DEFINITION"
 
   # Wait for the service deployment to succeed
