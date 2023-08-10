@@ -115,7 +115,7 @@ resource "aws_ecs_service" "app_service" {
   cluster         = aws_ecs_cluster.app_cluster.id
   task_definition = aws_ecs_task_definition.app_task_definition.arn
   launch_type     = "FARGATE"
-  desired_count   = 3
+  desired_count   = 1
   propagate_tags  = "TASK_DEFINITION"
 
   # Wait for the service deployment to succeed
@@ -138,6 +138,55 @@ resource "aws_ecs_service" "app_service" {
     container_port   = 8080 # Specifying the container port
   }
 }
+
+# Autoscaling
+# We can scale by
+# ECSServiceAverageCPUUtilization, ECSServiceAverageMemoryUtilization, and ALBRequestCountPerTarget
+# out of the box or use custom metrics
+resource "aws_appautoscaling_target" "ecs_target" {
+  min_capacity       = 1
+  max_capacity       = 3
+  resource_id        = "service/${aws_ecs_cluster.app_cluster.name}/${aws_ecs_service.app_service.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace  = "ecs"
+}
+
+resource "aws_appautoscaling_policy" "cpu_scaling" {
+  name               = "${module.this.id}-application-scaling-policy-cpu"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs_target.resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs_target.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs_target.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+    target_value       = 30
+    scale_in_cooldown  = 180
+    scale_out_cooldown = 90
+  }
+  depends_on = [aws_appautoscaling_target.ecs_target]
+}
+
+resource "aws_appautoscaling_policy" "memory_scaling" {
+  name               = "${module.this.id}-application-scaling-policy-memory"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs_target.resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs_target.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs_target.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+    }
+    target_value       = 30
+    scale_in_cooldown  = 180
+    scale_out_cooldown = 90
+  }
+  depends_on = [aws_appautoscaling_target.ecs_target]
+}
+
 
 # Load Balancers & Networking
 resource "aws_lb" "application_load_balancer" {
