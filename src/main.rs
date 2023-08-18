@@ -1,6 +1,6 @@
 use {
+    archive::{config, error, log},
     dotenv::dotenv,
-    gilgamesh::{config, error, log},
     tokio::sync::broadcast,
 };
 
@@ -14,8 +14,8 @@ async fn main() -> error::Result<()> {
         "Failed to load configuration, please ensure that all environment variables are defined.",
     );
 
-    let options = gilgamesh::Options::default();
-    let result = gilgamesh::bootstrap(shutdown, config, options).await;
+    let options = archive::Options::default();
+    let result = archive::bootstrap(shutdown, config, options).await;
 
     logger.stop();
 

@@ -1,7 +1,13 @@
+data "aws_ecr_repository" "repository" {
+  name = module.this.name
+}
+
 locals {
   service_name               = "${module.this.id}-service"
   file_descriptor_soft_limit = pow(2, 18)
   file_descriptor_hard_limit = local.file_descriptor_soft_limit * 2
+  image                      = "${data.aws_ecr_repository.repository.repository_url}:${var.image_version}"
+
 }
 
 # Log Group for our App
@@ -40,7 +46,7 @@ resource "aws_ecs_task_definition" "app_task_definition" {
   container_definitions = jsonencode([
     {
       name  = module.this.id,
-      image = var.image,
+      image = local.image,
       cpu   = var.cpu - 128, # Remove sidecar memory/cpu so rest is assigned to primary container
       ulimits = [{
         name : "nofile",

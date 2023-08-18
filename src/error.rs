@@ -81,7 +81,7 @@ pub enum Error {
     #[error(transparent)]
     FromUtf8Error(#[from] std::string::FromUtf8Error),
 
-    #[error("History item received without a topic, please ensure all required  parameters set")]
+    #[error("Archive item received without a topic, please ensure all required  parameters set")]
     MissingTopic,
 
     #[error("this should not have occurred; used when case has been handled before")]
@@ -145,8 +145,8 @@ impl IntoResponse for Error {
             },
             Error::MissingAllSignatureHeader => crate::handlers::Response::new_failure(StatusCode::UNAUTHORIZED, vec![
                 ResponseError {
-                    name: "history_item_validation_failed".to_string(),
-                    message: "Failed to validate history item, please ensure that all required headers are provided.".to_string(),
+                    name: "archive_item_validation_failed".to_string(),
+                    message: "Failed to validate archive item, please ensure that all required headers are provided.".to_string(),
                 }
             ], vec![
                 ErrorField {
@@ -162,8 +162,8 @@ impl IntoResponse for Error {
             ]),
             Error::MissingSignatureHeader => crate::handlers::Response::new_failure(StatusCode::UNAUTHORIZED, vec![
                 ResponseError {
-                    name: "history_item_validation_failed".to_string(),
-                    message: "Failed to validate history item, please ensure that all required headers are provided.".to_string(),
+                    name: "archive_item_validation_failed".to_string(),
+                    message: "Failed to validate archive item, please ensure that all required headers are provided.".to_string(),
                 }
             ], vec![
                 ErrorField {
@@ -174,8 +174,8 @@ impl IntoResponse for Error {
             ]),
             Error::MissingTimestampHeader => crate::handlers::Response::new_failure(StatusCode::UNAUTHORIZED, vec![
                 ResponseError {
-                    name: "history_item_validation_failed".to_string(),
-                    message: "Failed to validate history item, please ensure that all required headers are provided.".to_string(),
+                    name: "archive_item_validation_failed".to_string(),
+                    message: "Failed to validate archive item, please ensure that all required headers are provided.".to_string(),
                 }
             ], vec![
                 ErrorField {

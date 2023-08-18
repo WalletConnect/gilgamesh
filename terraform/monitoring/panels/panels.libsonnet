@@ -13,12 +13,12 @@
     low_mem_op_throttled:           (import 'db/low_mem_op_throttled.libsonnet'     ).new,
   },
 
-  history: {
-    get_queries:                    (import 'history/get_queries.libsonnet'         ).new,
-    received_items:                 (import 'history/received_items.libsonnet'      ).new,
-    registrations:                  (import 'history/registrations.libsonnet'       ).new,
-    served_items:                   (import 'history/served_items.libsonnet'        ).new,
-    stored_items:                   (import 'history/stored_items.libsonnet'        ).new,
+  archive: {
+    get_queries:                    (import 'archive/get_queries.libsonnet'         ).new,
+    received_items:                 (import 'archive/received_items.libsonnet'      ).new,
+    registrations:                  (import 'archive/registrations.libsonnet'       ).new,
+    served_items:                   (import 'archive/served_items.libsonnet'        ).new,
+    stored_items:                   (import 'archive/stored_items.libsonnet'        ).new,
   },
 
   lb: {

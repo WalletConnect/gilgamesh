@@ -1,7 +1,7 @@
 use {
     crate::{context::ServerContext, get_client_jwt, TEST_RELAY_URL},
+    archive::{handlers::register::RegisterPayload, store::registrations::Registration},
     axum::http,
-    gilgamesh::{handlers::register::RegisterPayload, store::registrations::Registration},
     std::sync::Arc,
     test_context::test_context,
 };

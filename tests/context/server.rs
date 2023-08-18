@@ -1,6 +1,6 @@
 use {
     crate::storage::mocks::{messages::MockMessageStore, registrations::MockRegistrationStore},
-    gilgamesh::{config::Configuration, Options},
+    archive::{config::Configuration, Options},
     std::{
         env,
         net::{IpAddr, Ipv4Addr, SocketAddr, SocketAddrV4, TcpListener},
@@ -13,7 +13,7 @@ use {
     },
 };
 
-pub struct Gilgamesh {
+pub struct Archive {
     pub public_addr: SocketAddr,
     pub message_store: Arc<MockMessageStore>,
     pub registration_store: Arc<MockRegistrationStore>,
@@ -24,7 +24,7 @@ pub struct Gilgamesh {
 #[derive(Debug, thiserror::Error)]
 pub enum Error {}
 
-impl Gilgamesh {
+impl Archive {
     pub async fn start() -> Self {
         let public_port = get_random_port();
         let rt = Handle::current();
@@ -43,14 +43,13 @@ impl Gilgamesh {
         std::thread::spawn(move || {
             rt.block_on(async move {
                 let public_port = public_port;
-                let mongo_address = env::var("MONGO_ADDRESS").unwrap_or(
-                    "mongodb://admin:admin@mongo:27017/gilgamesh?authSource=admin".into(),
-                );
+                let mongo_address = env::var("MONGO_ADDRESS")
+                    .unwrap_or("mongodb://admin:admin@mongo:27017/archive?authSource=admin".into());
 
                 let config: Configuration = Configuration {
                     port: public_port,
                     public_url: format!("http://127.0.0.1:{public_port}"),
-                    log_level: "info,history-server=info".into(),
+                    log_level: "info,archive-server=info".into(),
                     relay_url: "https://relay.walletconnect.com".into(),
                     validate_signatures: false,
                     mongo_address,
@@ -59,7 +58,7 @@ impl Gilgamesh {
                     telemetry_prometheus_port: Some(get_random_port()),
                 };
 
-                gilgamesh::bootstrap(shutdown, config, options).await
+                archive::bootstrap(shutdown, config, options).await
             })
             .unwrap();
         });

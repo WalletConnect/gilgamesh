@@ -8,7 +8,7 @@ RUN apt update && \
 
 RUN cargo install cargo-watch
 
-WORKDIR /gilgamesh
+WORKDIR /archive
 COPY . .
 
 CMD ["cargo", "watch", "-x", "run"]

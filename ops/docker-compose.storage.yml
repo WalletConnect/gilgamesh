@@ -9,7 +9,7 @@ services:
   mongo:
     image: mongo:4
     networks:
-      - gilgamesh
+      - archive
     ports:
       - 27017:27017
     healthcheck:
@@ -28,12 +28,12 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=admin
-      - MONGO_INITDB_DATABASE=gilgamesh
+      - MONGO_INITDB_DATABASE=archive
 
   mongo-express:
     image: mongo-express
     networks:
-      - gilgamesh
+      - archive
     ports:
       - 8085:8081
     depends_on:
@@ -43,8 +43,8 @@ services:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
       - ME_CONFIG_MONGODB_ADMINPASSWORD=admin
       - ME_CONFIG_MONGODB_URL="mongodb://admin:admin@mongo:27017"
-      
+
 networks:
-  gilgamesh:
+  archive:
     ipam:
       driver: default

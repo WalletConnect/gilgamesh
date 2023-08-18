@@ -81,7 +81,7 @@ pub async fn bootstrap(
 
     if state.config.telemetry_prometheus_port.is_some() {
         state.set_metrics(metrics::Metrics::new(Resource::new(vec![
-            KeyValue::new("service_name", "history-server"),
+            KeyValue::new("service_name", "archive-server"),
             KeyValue::new(
                 "service_version",
                 state.build_info.crate_info.version.clone().to_string(),

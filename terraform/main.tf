@@ -5,7 +5,7 @@ locals {
 }
 
 data "github_release" "latest_release" {
-  repository  = "gilgamesh"
+  repository  = "archive"
   owner       = "walletconnect"
   retrieve_by = "latest"
 }
@@ -50,12 +50,12 @@ module "dns" {
 ################################################################################
 # Data Stores
 
-module "history_docdb" {
+module "archive_docdb" {
   source     = "./docdb"
   context    = module.this.context
-  attributes = ["history-db"]
+  attributes = ["archive-db"]
 
-  default_database            = "history"
+  default_database            = "archive"
   primary_instance_class      = var.docdb_primary_instance_class
   primary_instances           = var.docdb_primary_instances
   vpc_id                      = module.vpc.vpc_id
@@ -68,16 +68,12 @@ module "history_docdb" {
 ################################################################################
 # Application
 
-data "aws_ecr_repository" "repository" {
-  name = "gilgamesh"
-}
-
 module "ecs" {
   source  = "./ecs"
   context = module.this.context
 
-  prometheus_endpoint             = aws_prometheus_workspace.prometheus.prometheus_endpoint
-  image                           = "${data.aws_ecr_repository.repository.repository_url}:${local.version}"
+  prometheus_endpoint             = module.monitoring.prometheus_endpoint
+  image_version                   = local.version
   acm_certificate_arn             = module.dns.certificate_arn
   cpu                             = 1024
   route53-fqdn                    = local.fqdn
@@ -89,23 +85,18 @@ module "ecs" {
   vpc_id                          = module.vpc.vpc_id
   allowed_app_ingress_cidr_blocks = module.vpc.vpc_cidr_block
   allowed_lb_ingress_cidr_blocks  = module.vpc.vpc_cidr_block
-  docdb-connection_url            = module.history_docdb.connection_url
+  docdb-connection_url            = module.archive_docdb.connection_url
 }
 
 ################################################################################
 # Monitoring
 
-resource "aws_prometheus_workspace" "prometheus" {
-  alias = "prometheus-${module.this.id}"
-}
-
 module "monitoring" {
   source  = "./monitoring"
   context = module.this.context
 
-  prometheus_workspace_id = aws_prometheus_workspace.prometheus.id
-
-  docdb_cluster_id  = module.history_docdb.cluster_id
+  grafana_endpoint  = var.grafana_endpoint
+  docdb_cluster_id  = module.archive_docdb.cluster_id
   ecs_service_name  = module.ecs.service_name
   load_balancer_arn = module.ecs.load_balancer_arn
   target_group_arn  = module.ecs.target_group_arn

@@ -1,5 +1,5 @@
 use {
-    self::{server::Gilgamesh, store::PersistentStorage},
+    self::{server::Archive, store::PersistentStorage},
     async_trait::async_trait,
     test_context::AsyncTestContext,
 };
@@ -8,13 +8,13 @@ mod server;
 mod store;
 
 pub struct ServerContext {
-    pub server: Gilgamesh,
+    pub server: Archive,
 }
 
 #[async_trait]
 impl AsyncTestContext for ServerContext {
     async fn setup() -> Self {
-        let server = Gilgamesh::start().await;
+        let server = Archive::start().await;
         Self { server }
     }
 

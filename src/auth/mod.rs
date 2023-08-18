@@ -21,7 +21,7 @@ pub type Rejection = (StatusCode, &'static str);
 /// This structure can be used like any other axum extractor:
 ///
 /// ```no_run
-/// use gilgamesh::auth::AuthBearer;
+/// use archive::auth::AuthBearer;
 ///
 /// /// Handler for a typical [axum] route, takes a `token` and returns it
 /// async fn handler(AuthBearer(token): AuthBearer) -> String {

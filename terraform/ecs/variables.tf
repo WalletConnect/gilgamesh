@@ -9,8 +9,8 @@ variable "log_level" {
   default     = "INFO"
 }
 
-variable "image" {
-  description = "The name of the ECR image to use for the container."
+variable "image_version" {
+  description = "The version of the ECR image to use for the container."
   type        = string
 }
 

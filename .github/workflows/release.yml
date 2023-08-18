@@ -110,9 +110,9 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ${{ steps.login-ecr.outputs.registry }}/gilgamesh
+            ${{ steps.login-ecr.outputs.registry }}/archive
             ghcr.io/${{ github.repository }}
-            walletconnect/gilgamesh,enable=false
+            walletconnect/archive,enable=false
           flavor: |
             latest=auto
           tags: |

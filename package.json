@@ -1,5 +1,5 @@
 {
-  "name": "gilgamesh-integration-tests",
+  "name": "archive-integration-tests",
   "version": "1.0.0",
   "description": "Integration tests for Rust HTTP Starter",
   "scripts": {

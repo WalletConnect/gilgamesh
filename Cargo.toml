@@ -1,6 +1,6 @@
 [package]
-name = "gilgamesh"
-version = "0.8.2"
+name = "archive"
+version = "1.0.0"
 edition = "2021"
 authors = [
     "Derek <derek@walletconnect.com>",
@@ -59,7 +59,7 @@ data-encoding = "2.3"
 futures = "0.3.25"
 hex = "0.4"
 log = "0.4"
-moka = { version = "0.10", features = ["future"] }
+moka = { version = "0.11.2", features = ["future"] }
 reqwest = { version = "0.11", features = ["json"] }
 thiserror = "1.0"
 

@@ -1,14 +1,14 @@
 use {
     crate::{context::ServerContext, get_client_jwt, TEST_RELAY_URL},
-    axum::http,
-    chrono::Utc,
-    gilgamesh::{
+    archive::{
         handlers::{
             get_messages::{Direction, GetMessagesResponse},
-            save_message::HistoryPayload,
+            save_message::ArchivePayload,
         },
         store::{messages::Message, registrations::Registration},
     },
+    axum::http,
+    chrono::Utc,
     std::sync::Arc,
     test_context::test_context,
 };
@@ -193,7 +193,7 @@ async fn test_save_message_saved(ctx: &mut ServerContext) {
 
     let response = client
         .post(format!("http://{}/messages", ctx.server.public_addr))
-        .json(&HistoryPayload {
+        .json(&ArchivePayload {
             method: Arc::from(TEST_METHOD),
             client_id: client_id.clone().into_value(),
             message_id: Arc::from(format!("{TEST_MESSAGE_ID}-1")),
@@ -215,7 +215,7 @@ async fn test_save_message_saved(ctx: &mut ServerContext) {
 
     let response = client
         .post(format!("http://{}/messages", ctx.server.public_addr))
-        .json(&HistoryPayload {
+        .json(&ArchivePayload {
             method: Arc::from(TEST_METHOD),
             client_id: client_id.clone().into_value(),
             message_id: Arc::from(format!("{TEST_MESSAGE_ID}-2")),
@@ -289,7 +289,7 @@ async fn test_save_message_filtered_out(ctx: &mut ServerContext) {
 
     let response = client
         .post(format!("http://{}/messages", ctx.server.public_addr))
-        .json(&HistoryPayload {
+        .json(&ArchivePayload {
             method: Arc::from(TEST_METHOD),
             client_id: client_id.clone().into_value(),
             message_id: Arc::from(format!("{TEST_MESSAGE_ID}-1")),
@@ -311,7 +311,7 @@ async fn test_save_message_filtered_out(ctx: &mut ServerContext) {
 
     let response = client
         .post(format!("http://{}/messages", ctx.server.public_addr))
-        .json(&HistoryPayload {
+        .json(&ArchivePayload {
             method: Arc::from(TEST_METHOD),
             client_id: client_id.clone().into_value(),
             message_id: Arc::from(format!("{TEST_MESSAGE_ID}-2")),
@@ -381,7 +381,7 @@ async fn test_save_message_no_registration(ctx: &mut ServerContext) {
 
     let response = client
         .post(format!("http://{}/messages", ctx.server.public_addr))
-        .json(&HistoryPayload {
+        .json(&ArchivePayload {
             method: Arc::from(TEST_METHOD),
             client_id: Arc::from(TEST_CLIENT_ID),
             message_id: Arc::from(TEST_MESSAGE_ID),

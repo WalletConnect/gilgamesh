@@ -13,9 +13,10 @@ variable "azs" {
 variable "public_url" {
   description = "The public URL of the service."
   type        = string
-  default     = "history.walletconnect.com"
+  default     = "archive.walletconnect.com"
 }
 
+# Expects GRAFANA_AUTH env variable to be set
 variable "grafana_endpoint" {
   description = "The endpoint of the Grafana instance used for monitoring."
   type        = string
