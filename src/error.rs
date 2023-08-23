@@ -1,6 +1,7 @@
 use {
     crate::{
         handlers::{ErrorField, ErrorLocation, ResponseError},
+        log::prelude::*,
         relay::signature::{SIGNATURE_HEADER_NAME, TIMESTAMP_HEADER_NAME},
         store::StoreError,
     },
@@ -99,6 +100,7 @@ pub enum Error {
 
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
+        error!("responding with error ({:?})", self);
         match self {
             Error::Database(e) => crate::handlers::Response::new_failure(StatusCode::INTERNAL_SERVER_ERROR, vec![
                 ResponseError {
