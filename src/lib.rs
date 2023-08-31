@@ -9,6 +9,8 @@ use {
         Router,
     },
     config::Configuration,
+    http::Request,
+    hyper::Body,
     opentelemetry::{sdk::Resource, KeyValue},
     state::AppState,
     std::{net::SocketAddr, sync::Arc},
@@ -17,7 +19,7 @@ use {
     tower::ServiceBuilder,
     tower_http::{
         cors::{Any, CorsLayer},
-        trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
+        trace::{DefaultOnRequest, DefaultOnResponse, TraceLayer},
     },
 };
 
@@ -96,7 +98,9 @@ pub async fn bootstrap(
 
     let global_middleware = ServiceBuilder::new().layer(
         TraceLayer::new_for_http()
-            .make_span_with(DefaultMakeSpan::new().include_headers(true))
+            .make_span_with(|request: &Request<Body>| {
+                tracing::info_span!("http-request", "method" = ?request.method(), "uri" = ?request.uri())
+            })
             .on_request(DefaultOnRequest::new().level(config.log_level()))
             .on_response(
                 DefaultOnResponse::new()
