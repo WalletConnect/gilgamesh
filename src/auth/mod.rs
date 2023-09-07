@@ -60,7 +60,7 @@ impl AuthBearer {
         Self(contents.to_string())
     }
 
-    fn decode_request_parts(req: &mut Parts) -> Result<Self, Rejection> {
+    fn decode_request_parts(req: &Parts) -> Result<Self, Rejection> {
         // Get authorization header
         let authorization = req
             .headers
@@ -73,7 +73,7 @@ impl AuthBearer {
         let split = authorization.split_once(' ');
         match split {
             // Found proper bearer
-            Some((name, contents)) if name == "Bearer" => Ok(Self::from_header(contents)),
+            Some(("Bearer", contents)) => Ok(Self::from_header(contents)),
             // Found empty bearer
             _ if authorization == "Bearer" => Ok(Self::from_header("")),
             // Found nothing

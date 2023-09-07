@@ -42,7 +42,6 @@ impl Gilgamesh {
 
         std::thread::spawn(move || {
             rt.block_on(async move {
-                let public_port = public_port;
                 let mongo_address = env::var("MONGO_ADDRESS").unwrap_or(
                     "mongodb://admin:admin@mongo:27017/gilgamesh?authSource=admin".into(),
                 );
