@@ -70,10 +70,6 @@ async fn overwrite_registration(
     tags: HashSet<Arc<str>>,
     relay_url: Arc<str>,
 ) -> error::Result<Response> {
-    info!(
-        "DBG:{}:overwrite_registration: upsert registration",
-        client_id
-    );
     state
         .registration_store
         .upsert_registration(
@@ -83,10 +79,6 @@ async fn overwrite_registration(
         )
         .await?;
 
-    info!(
-        "DBG:{}:overwrite_registration: cache registration",
-        client_id
-    );
     state
         .registration_cache
         .insert(client_id.into_value(), CachedRegistration {
@@ -108,27 +100,15 @@ async fn update_registration(
     let append_tags = append_tags.unwrap_or_default();
     let remove_tags = remove_tags.unwrap_or_default();
 
-    info!(
-        "DBG:{}:update_registration: process intersection of <append_tags> and <remove_tags>...",
-        client_id
-    );
     if remove_tags.intersection(&append_tags).count() > 0 {
         return Err(Error::InvalidUpdateRequest);
     }
 
-    info!(
-        "DBG:{}:update_registration: get current registration",
-        client_id
-    );
     let registration = state
         .registration_store
         .get_registration(client_id.as_ref())
         .await?;
 
-    info!(
-        "DBG:{}:update_registration: get current registration",
-        client_id
-    );
     let tags = registration
         .tags
         .into_iter()
@@ -140,6 +120,5 @@ async fn update_registration(
         .cloned()
         .collect();
 
-    info!("DBG:{}: overwrite registration", client_id);
     overwrite_registration(state, client_id, tags, relay_url).await
 }
