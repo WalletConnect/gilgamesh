@@ -1,11 +1,14 @@
 extern crate core;
 
-use relay_rpc::{
-    auth::{
-        ed25519_dalek::Keypair,
-        rand::{rngs::StdRng, SeedableRng},
+use {
+    chrono::{Duration, Utc},
+    relay_rpc::{
+        auth::{
+            ed25519_dalek::Keypair,
+            rand::{rngs::StdRng, SeedableRng},
+        },
+        domain::{ClientId, DecodedClientId},
     },
-    domain::{ClientId, DecodedClientId},
 };
 
 mod context;
@@ -37,6 +40,23 @@ fn get_client_jwt() -> (String, ClientId) {
 
     let jwt = relay_rpc::auth::AuthToken::new(client_id.to_string())
         .aud(TEST_RELAY_URL.to_string())
+        .as_jwt(&keypair)
+        .unwrap()
+        .to_string();
+
+    (jwt, client_id)
+}
+
+fn get_invalid_client_jwt() -> (String, ClientId) {
+    let mut rng = StdRng::from_entropy();
+    let keypair = Keypair::generate(&mut rng);
+
+    let random_client_id = DecodedClientId(*keypair.public_key().as_bytes());
+    let client_id = ClientId::from(random_client_id);
+
+    let jwt = relay_rpc::auth::AuthToken::new(client_id.to_string())
+        .aud(TEST_RELAY_URL.to_string())
+        .iat(Utc::now() + Duration::days(1))
         .as_jwt(&keypair)
         .unwrap()
         .to_string();

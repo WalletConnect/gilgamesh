@@ -1,10 +1,39 @@
 use {
-    crate::{context::ServerContext, get_client_jwt, TEST_RELAY_URL},
+    crate::{context::ServerContext, get_client_jwt, get_invalid_client_jwt, TEST_RELAY_URL},
     axum::http,
     gilgamesh::{handlers::register::RegisterPayload, store::registrations::Registration},
     std::sync::Arc,
     test_context::test_context,
 };
+
+#[test_context(ServerContext)]
+#[tokio::test]
+async fn test_register_invalid_jwt(ctx: &mut ServerContext) {
+    let (jwt, _) = get_invalid_client_jwt();
+
+    let payload = RegisterPayload {
+        tags: Some(vec![Arc::from("4000"), Arc::from("5***")]),
+        append_tags: None,
+        remove_tags: None,
+        relay_url: Arc::from(TEST_RELAY_URL),
+    };
+
+    let client = reqwest::Client::new();
+    let response = client
+        .post(format!("http://{}/register", ctx.server.public_addr))
+        .json(&payload)
+        .header(http::header::AUTHORIZATION, format!("Bearer {jwt}"))
+        .send()
+        .await
+        .expect("Call failed");
+
+    assert!(
+        response.status().is_client_error(),
+        "Response was not successful: {:?} - {:?}",
+        response.status(),
+        response.text().await
+    );
+}
 
 #[test_context(ServerContext)]
 #[tokio::test]
@@ -315,4 +344,39 @@ async fn test_get_registration(ctx: &mut ServerContext) {
     let payload: RegisterPayload = response.json().await.unwrap();
     assert_eq!(payload.tags.unwrap(), tags);
     assert_eq!(payload.relay_url.as_ref(), TEST_RELAY_URL);
+}
+
+#[test_context(ServerContext)]
+#[tokio::test]
+async fn test_get_registration_invalid_jwt(ctx: &mut ServerContext) {
+    let (jwt, client_id) = get_invalid_client_jwt();
+
+    let tags = vec![Arc::from("4000"), Arc::from("5***")];
+    let registration = Registration {
+        id: None,
+        client_id: client_id.clone().into_value(),
+        tags: tags.clone(),
+        relay_url: Arc::from(TEST_RELAY_URL),
+    };
+
+    ctx.server
+        .registration_store
+        .registrations
+        .insert(client_id.to_string(), registration)
+        .await;
+
+    let client = reqwest::Client::new();
+    let response = client
+        .get(format!("http://{}/register", ctx.server.public_addr))
+        .header(http::header::AUTHORIZATION, format!("Bearer {jwt}"))
+        .send()
+        .await
+        .expect("Call failed");
+
+    assert!(
+        response.status().is_client_error(),
+        "Response was not successful: {:?} - {:?}",
+        response.status(),
+        response.text().await
+    );
 }

@@ -102,6 +102,12 @@ impl IntoResponse for Error {
     fn into_response(self) -> Response {
         error!("responding with error ({:?})", self);
         match self {
+            Error::JwtError(e) => crate::handlers::Response::new_failure(StatusCode::UNAUTHORIZED, vec![
+                ResponseError {
+                    name: "jwt".to_string(),
+                    message: e.to_string(),
+                }
+            ], vec![]),
             Error::Database(e) => crate::handlers::Response::new_failure(StatusCode::INTERNAL_SERVER_ERROR, vec![
                 ResponseError {
                     name: "mongodb".to_string(),
